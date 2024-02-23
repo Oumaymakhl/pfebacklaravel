@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -15,18 +16,25 @@ class SadminController extends Controller
         $data = $request->validate([
             'nom' => 'required',
             'prenom' => 'required',
-            'login' => 'required|unique:sadmins',
+            'login' => 'required',
             'password' => 'required|min:8',
-            'email' => 'required|email|unique:sadmins',
+            'email' => 'required|email',
         ]);
 
-        $data['password'] = bcrypt($data['password']);
+        $existingUser = Sadmin::where('email', $data['email'])
+        ->orWhere('login', $data['login'])
+        ->first();
 
-        $sadmin = Sadmin::create($data);
-
-        return response()->json(['message' => 'Signup successful', 'sadmin' => $sadmin], 201);
+    if ($existingUser) {
+        return response()->json(['message' => 'User already exists'], 422);
     }
 
+    $data['password'] = bcrypt($data['password']);
+
+    $sadmin = Sadmin::create($data);
+
+    return response()->json(['message' => 'Signup successful', 'sadmin' => $sadmin], 201);
+    }
     public function login(Request $request)
     {
         $credentials = $request->validate([

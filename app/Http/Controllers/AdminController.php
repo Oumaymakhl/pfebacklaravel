@@ -13,17 +13,24 @@ class AdminController extends Controller
         $data = $request->validate([
             'nom' => 'required',
             'prenom' => 'required',
-            'login' => 'required|unique:admins',
+            'login' => 'required',
             'password' => 'required|min:8',
-            'email' => 'required|email|unique:admins',
+            'email' => 'required|email',
         ]);
 
-        $data['password'] = bcrypt($data['password']);
+        $existingUser = admin::where('email', $data['email'])
+        ->orWhere('login', $data['login'])
+        ->first();
 
-        $admin = admin::create($data);
-        
+    if ($existingUser) {
+        return response()->json(['message' => 'User already exists'], 422);
+    }
 
-        return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
+    $data['password'] = bcrypt($data['password']);
+
+    $admin = admin::create($data);
+
+    return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
     }
 
     public function login(Request $request)

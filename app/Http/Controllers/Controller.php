@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -20,16 +19,24 @@ class Controller extends BaseController
         $data = $request->validate([
             'nom' => 'required',
             'prenom' => 'required',
-            'login' => 'required|unique:users',
+            'login' => 'required',
             'password' => 'required|min:8',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email',
         ]);
 
-        $data['password'] = bcrypt($data['password']);
+        $existingUser = User::where('email', $data['email'])
+        ->orWhere('login', $data['login'])
+        ->first();
 
-        $user = User::create($data);
+    if ($existingUser) {
+        return response()->json(['message' => 'User already exists'], 422);
+    }
 
-        return response()->json(['message' => 'Signup successful', 'user' => $user], 201);
+    $data['password'] = bcrypt($data['password']);
+
+    $user = User::create($data);
+
+    return response()->json(['message' => 'Signup successful', 'user' => $user], 201);
     }
 
     public function login(Request $request)
