@@ -7,6 +7,8 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserRegistrationMail;
 
 
 
@@ -31,10 +33,13 @@ class Controller extends BaseController
     if ($existingUser) {
         return response()->json(['message' => 'User already exists'], 422);
     }
+    $password = $data['password'];
 
     $data['password'] = bcrypt($data['password']);
 
     $user = User::create($data);
+    Mail::to($user->email)->send(new UserRegistrationMail($user, $password));
+
 
     return response()->json(['message' => 'Signup successful', 'user' => $user], 201);
     }

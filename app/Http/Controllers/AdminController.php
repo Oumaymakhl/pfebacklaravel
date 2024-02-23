@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AdminRegistrationMail;
 use Illuminate\Http\Request;
 use App\Models\admin;
 use Illuminate\Support\Facades\Auth;
@@ -18,19 +19,24 @@ class AdminController extends Controller
             'email' => 'required|email',
         ]);
 
-        $existingUser = admin::where('email', $data['email'])
-        ->orWhere('login', $data['login'])
-        ->first();
+        $existingUser = Admin::where('email', $data['email'])
+            ->orWhere('login', $data['login'])
+            ->first();
 
-    if ($existingUser) {
-        return response()->json(['message' => 'User already exists'], 422);
-    }
+        if ($existingUser) {
+            return response()->json(['message' => 'User already exists'], 422);
+        }
 
-    $data['password'] = bcrypt($data['password']);
+        $password = $data['password'];
 
-    $admin = admin::create($data);
+        $data['password'] = bcrypt($data['password']);
 
-    return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
+        $admin = Admin::create($data);
+
+        // Envoi de l'e-mail de confirmation
+        Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $password));
+
+        return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
     }
 
     public function login(Request $request)
