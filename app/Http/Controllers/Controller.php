@@ -64,4 +64,54 @@ if ($existingUser) {
             return response()->json(['message' => 'Invalid login credentials'], 401);
         }
     }
+    public function index()
+    {
+        $users = User::all();
+        return response()->json(['users' => $users], 200);
+    }
+
+
+
+    public function show($id)
+{
+    $user = User::find($id);
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+    return response()->json(['user' => $user], 200);
+}
+
+
+    public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $data = $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'login' => 'required',
+            'password' => 'required|min:8',
+            'email' => 'required|email|unique:users,email,' . $id,
+        ]);
+
+        $data['password'] = bcrypt($data['password']);
+
+        $user->update($data);
+
+        return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+    }
+
+    public function destroy($id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+        $user->delete();
+        return response()->json(['message' => 'User deleted successfully'], 200);
+    }
+  
 }

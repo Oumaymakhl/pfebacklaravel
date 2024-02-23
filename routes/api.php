@@ -26,3 +26,7 @@ Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
+Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
+Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
+Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
+Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
