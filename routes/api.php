@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SadminController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\CompanyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,3 +27,9 @@ Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
+
+ Route::get('/companies/index', [CompanyController::class, 'index']); 
+ Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
+Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
+Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']); 
+

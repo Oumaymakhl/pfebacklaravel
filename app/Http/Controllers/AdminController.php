@@ -1,14 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Company;
 use Illuminate\Http\Request;
 use App\Models\admin;
 use Illuminate\Support\Facades\Auth;
 class AdminController extends Controller
 {
     //
-    public function signup(Request $request)
+   /* public function signup(Request $request)
     {
         $data = $request->validate([
             'nom' => 'required',
@@ -22,9 +22,48 @@ class AdminController extends Controller
 
         $admin = admin::create($data);
         
-
+        
         return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
+    }*/
+    public function signup(Request $request)
+    {
+        
+    
+        $data = $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'login' => 'required|unique:admins',
+            'password' => 'required|min:8',
+            'email' => 'required|email|unique:admins',
+            'company.nom' => 'required',
+            'company.adresse' => 'required',
+            'company.subdomaine' => 'required|unique:companies,subdomaine',
+            'company.logo' => 'nullable|image',
+        ]);
+    
+        
+        $data['password'] = bcrypt($data['password']);
+    
+        
+        $company = Company::create([
+            'nom' => $data['company']['nom'],
+            'adresse' => $data['company']['adresse'],
+            'subdomaine' => $data['company']['subdomaine'],
+            'logo' => $data['company']['logo'] ? $data['company']['logo']->store('logos') : null,
+        ]);
+    
+        $admin = Admin::create([
+            'nom' => $data['nom'],
+            'prenom' => $data['prenom'],
+            'login' => $data['login'],
+            'password' => $data['password'],
+            'email' => $data['email'],
+            'company_id' => $company->id,
+        ]);
+    
+        return response()->json(['message' => 'Signup successful', 'admin' => $admin, 'company' => $company], 201);
     }
+    
 
     public function login(Request $request)
     {
