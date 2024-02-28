@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SadminController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ReunionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -30,3 +32,7 @@ Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
 Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
+Route::post('/reunions', [ReunionController::class, 'create_reunion']); // Create
+Route::get('/reunions', [ReunionController::class, 'index']); // Read
+Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
+Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
