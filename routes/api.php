@@ -26,6 +26,11 @@ Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
+Route::get('/companies/index', [CompanyController::class, 'index']); 
+ Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
+Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
+Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']); 
+
 Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
