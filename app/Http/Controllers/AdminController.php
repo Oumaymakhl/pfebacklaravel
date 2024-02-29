@@ -1,8 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\AdminRegistrationMail;
+
 use Illuminate\Http\Request;
 use App\Models\admin;
 use App\Models\User;
@@ -12,36 +11,22 @@ class AdminController extends Controller
 {
     //
     public function signup(Request $request)
-{
-    $data = $request->validate([
-        'nom' => 'required',
-        'prenom' => 'required',
-        'login' => 'required',
-        'password' => 'required|min:8',
-        'email' => 'required|email',
-    ]);
-    $existingUser = Admin::where('email', $data['email'])
-            ->orWhere('login', $data['login'])
-            ->first();
-
-        if ($existingUser) {
-            return response()->json(['message' => 'User already exists'], 422);
-        }
-    // Vérifier si l'email ou le login est déjà utilisé dans les autres rôles
-    if (User::where('email', $data['email'])->orWhere('login', $data['login'])->exists() ||
-        Sadmin::where('email', $data['email'])->orWhere('login', $data['login'])->exists()) {
-        return response()->json(['message' => 'Email or login already exists in other roles'], 422);
-    }
-
-    $password = $data['password'];
+    {
+        $data = $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'login' => 'required|unique:admins',
+            'password' => 'required|min:8',
+            'email' => 'required|email|unique:admins',
+        ]);
 
     $data['password'] = bcrypt($data['password']);
 
-    $admin = Admin::create($data);
-    Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $password));
+        $admin = admin::create($data);
+        
 
-    return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
-}
+        return response()->json(['message' => 'Signup successful', 'admin' => $admin], 201);
+    }
 
     public function login(Request $request)
     {

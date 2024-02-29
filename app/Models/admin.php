@@ -15,7 +15,7 @@ class admin extends  Authenticatable
         'login',
         'password', 
         'email',
+        'company_id',
         
     ];
-   
 }
