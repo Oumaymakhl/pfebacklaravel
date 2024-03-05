@@ -23,6 +23,7 @@ class User extends Authenticatable
         'login',
         'password', 
         'email',
+        'company_id'
     ];
 
     /**
@@ -44,4 +45,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function reunions()
+{
+    return $this->belongsToMany(Reunion::class, 'presence')->withPivot('status');
+}
+public function company()
+{
+    return $this->belongsTo(Company::class);
+}
 }

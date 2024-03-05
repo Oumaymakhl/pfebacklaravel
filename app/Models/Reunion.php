@@ -14,4 +14,9 @@ class Reunion extends Model
     {
         return $this->belongsTo(admin::class);
     }
+    public function users()
+{
+    return $this->belongsToMany(User::class, 'presence')->withPivot('status');
+}
+
 }

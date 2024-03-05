@@ -32,6 +32,8 @@ Route::get('/companies/index', [CompanyController::class, 'index']);
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
 Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
 Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']); 
+Route::get('/finds/{id}', [ReunionController::class, 'getEtat']);
+Route::post('/finds', [ReunionController::class, 'setEtat']);
 
 Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
@@ -42,3 +44,5 @@ Route::post('/reunions', [ReunionController::class, 'create_reunion']); // Creat
 Route::get('/reunions', [ReunionController::class, 'index']); // Read
 Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
 Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
+Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
+Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');

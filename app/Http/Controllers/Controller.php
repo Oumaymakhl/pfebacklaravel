@@ -26,6 +26,8 @@ class Controller extends BaseController
         'login' => 'required',
         'password' => 'required|min:8',
         'email' => 'required|email',
+        'company_id' => 'required',
+
     ]);
     $existingUser = User::where('email', $data['email'])
     ->orWhere('login', $data['login'])
