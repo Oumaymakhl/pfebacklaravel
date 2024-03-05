@@ -1,33 +1,15 @@
 <?php
 
-// app/Http/Controllers/ReunionController.php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Reunion;
-
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InvitationMail;
+use Illuminate\Support\Facades\DB;
 class ReunionController extends Controller
 {
-    /* public function store(Request $request)
-    {
-        
-    
-    
-        $data = $request->validate([
-            'titre' => 'required',
-            'description' => 'nullable',
-            'date' => 'required|date',
-            'id_admin' => 'required|id_admin',
-
-        ]);
-
-        $reunion = Reunion::create($data);
-    
-        return response()->json(['message' => 'Réunion créée avec succès', 'reunion' => $reunion], 201);
-
-    } */
-    
     public function create_reunion(Request $request)
     {
         $request->validate([
@@ -42,7 +24,7 @@ class ReunionController extends Controller
 
         return response()->json([
             'reunions' => $reunions,
-            'message' => 'reunion created successfully.',
+            'message' => 'Reunion created successfully.',
         ], 201);
     }
 
@@ -65,7 +47,7 @@ class ReunionController extends Controller
 
         $reunion->update($data);
 
-        return response()->json(['message' => 'Réunion mise à jour avec succès', 'reunion' => $reunion], 200);
+        return response()->json(['message' => 'Reunion updated successfully', 'reunion' => $reunion], 200);
     }
 
     public function destroy($id)
@@ -73,7 +55,99 @@ class ReunionController extends Controller
         $reunion = Reunion::findOrFail($id);
         $reunion->delete();
 
-        return response()->json(['message' => 'Réunion supprimée avec succès'], 200);
+        return response()->json(['message' => 'Reunion deleted successfully'], 200);
     }
-}
 
+    public function getInvitedUsers($companyId, $reunionId)
+    {
+        $reunion = Reunion::findOrFail($reunionId);
+
+        $invitedUsers = User::where('company_id', $companyId)->get();
+
+        return response()->json(['invited_users' => $invitedUsers, 'reunion' => $reunion], 200);
+    }
+    
+
+    public function getEtat($id)
+    {
+        // Retrieve the reunion object
+        $reunion = Reunion::find($id);
+    
+        // Check if the reunion exists
+        if (!$reunion) {
+            return response()->json(['error' => 'Reunion not found'], 404); // Or handle the case where the reunion doesn't exist
+        }
+    
+        // Retrieve users with their status for this reunion
+        $users = DB::table('presence')
+                    ->where('reunion_id', $id)
+                    ->join('users', 'presence.user_id', '=', 'users.id')
+                    ->select('users.*', 'presence.status')
+                    ->get();
+    
+        // Assuming you want to return the users with their status as JSON
+        return response()->json(['users' => $users], 200);
+    }
+    public function setEtat(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'user_id'=>'required',
+            'status' => 'required',
+            'raison' => 'required',
+            'reunion_id' => 'required', // Ensure that the provided reunion_id exists in the reunions table
+        ]);
+    
+        // Retrieve the user object
+        $user = User::find($request->input('user_id'));
+    
+        // Check if the user exists
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    
+        // Retrieve the reunion object
+        $reunionId = $request->input('reunion_id');
+    
+        // Check if the reunion exists
+        $reunionExists = DB::table('reunions')->where('id', $reunionId)->exists();
+        if (!$reunionExists) {
+            return response()->json(['error' => 'Reunion not found'], 404);
+        }
+    
+        // Update or create presence record using DB facade
+        DB::table('presence')->updateOrInsert(
+            ['user_id' => $user->id, 'reunion_id' => $reunionId],
+            ['status' => $request->input('status'), 'raison' => $request->input('raison')]
+        );
+    
+        return response()->json(['message' => 'Status updated successfully'], 200);
+    }
+
+    public function inviteUsers(Request $request)
+    {
+        // Valider les données de la requête
+        $request->validate([
+            'reunion_id' => 'required',
+            'user_id' => 'required',
+        ]);
+        try {
+            // Trouver la réunion
+            $reunion = Reunion::find($request->reunion_id);
+            // Récupérer les IDs des utilisateurs à inviter
+            $userId = $request->user_id;
+            
+            // Trouver les utilisateurs correspondants aux IDs
+            $user = User::find($userId);    
+            // Envoyer une invitation à chaque utilisateur et les attacher à la réunion
+                Mail::to($user->email)->send(new InvitationMail($reunion));
+               /*  $reunion->invitedUsers()->attach($user->id);  */
+            
+               return response()->json(['message' => 'Invitations sent successfully to ',$user->email ], 200);
+        } catch (\Exception $e) {
+            // Réponse JSON en cas d'erreur
+            return response()->json(['message' => 'Failed to send invitations', 'error' => $e->getMessage()], 500);
+        }
+    }
+    
+}

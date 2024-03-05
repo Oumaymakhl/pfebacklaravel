@@ -11,16 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('nom');
-            $table->string('prenom');
-            $table->string('login');
-            $table->string('password');
-            $table->string('email');
-            $table->timestamps();
-            
+        Schema::table('users', function (Blueprint $table) {
+            $table->unsignedBigInteger('company_id')->nullable();
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
         });
+        
+       
     }
 
     /**
@@ -28,6 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        $table->dropForeign(['company_id']);
+            $table->dropColumn('company_id');
     }
 };
