@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ReunionController;
+use App\Http\Controllers\DocumentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,3 +47,8 @@ Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
 Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
+
+Route::post('/documents/import', [DocumentController::class, 'importDocument']);
+Route::get('/documents/{id}/export', [DocumentController::class, 'exportDocument']);
+Route::get('/documents/{id}/sign', [DocumentController::class, 'signDocument']);
+Route::get('/documents/{id}/download', [DocumentController::class, 'downloadSignedDocument']);
