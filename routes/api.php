@@ -9,6 +9,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ReunionController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DecisionController;
+use App\Http\Controllers\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,4 +70,10 @@ Route::post('/decisions2/{decision}/like/{userId}', [DecisionController::class, 
 
 // Route pour disliker une décision
 Route::post('/decisions2/{decision}/dislike/{userId}', [DecisionController::class, 'dislikeDecision2']);
+
+Route::get('/tasks', [TaskController::class, 'index']); // Afficher toutes les tâches
+Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle tâche
+Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
+Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
+Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
 

@@ -57,4 +57,9 @@ public function likes()
 {
     return $this->hasMany(Like::class);
 }
+public function tasks()
+{
+    return $this->hasMany(Task::class);
+}
+
 }
