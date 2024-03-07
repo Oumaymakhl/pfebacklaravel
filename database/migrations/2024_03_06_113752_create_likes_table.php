@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('decisions', function (Blueprint $table) {
+        Schema::create('likes', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
+        
+            $table->boolean('like')->default(false);
+            $table->boolean('dislike')->default(false);
             $table->timestamps();
+
+          
         });
     }
 
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('decisions');
+        Schema::dropIfExists('likes');
     }
 };
