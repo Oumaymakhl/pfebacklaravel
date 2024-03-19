@@ -10,6 +10,7 @@ use App\Http\Controllers\ReunionController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\StatisticController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,3 +78,7 @@ Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâc
 Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
 
+Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
+Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
+Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasksByStatus']);
+Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
