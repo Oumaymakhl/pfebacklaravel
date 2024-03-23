@@ -53,4 +53,13 @@ public function company()
 {
     return $this->belongsTo(Company::class);
 }
+public function likes()
+{
+    return $this->hasMany(Like::class);
+}
+public function tasks()
+{
+    return $this->hasMany(Task::class);
+}
+
 }

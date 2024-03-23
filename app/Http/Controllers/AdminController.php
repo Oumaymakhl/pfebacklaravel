@@ -33,12 +33,12 @@ class AdminController extends Controller
     $data = $request->validate([
         'nom' => 'required',
         'prenom' => 'required',
-        'login' => 'required|unique:admins',
+        'login' => 'required',
         'password' => 'required|min:8',
-        'email' => 'required|email|unique:admins',
+        'email' => 'required',
         'company.nom' => 'required',
         'company.adresse' => 'required',
-        'company.subdomaine' => 'required|unique:companies,subdomaine',
+        'company.subdomaine' => 'required',
         'company.logo' => 'nullable|image',
     ]);
 
