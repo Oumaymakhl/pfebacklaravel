@@ -30,7 +30,7 @@ Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
-Route::post('/user/signup', [Controller::class, 'signup']);
+Route::post('user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
@@ -82,3 +82,10 @@ Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
 Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasksByStatus']);
 Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
+
+
+Route::get('/admin', [AdminController::class, 'index']);
+Route::get('/admin/{id}', [AdminController::class, 'show']);
+Route::get('/admin/{id}/edit', [AdminController::class, 'edit']);
+Route::put('/admin/{id}', [AdminController::class, 'update']);
+Route::delete('/admin/{id}', [AdminController::class, 'destroy']);

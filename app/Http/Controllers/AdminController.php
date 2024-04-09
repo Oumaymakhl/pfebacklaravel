@@ -79,4 +79,78 @@ class AdminController extends Controller
             return response()->json(['message' => 'Invalid login credentials'], 401);
         }
     }
+     public function index()
+    {
+        $admins = Admin::all();
+        return response()->json(['admins' => $admins], 200);
+    }
+
+    public function show($id)
+    {
+        $admin = Admin::find($id);
+        if (!$admin) {
+            return response()->json(['message' => 'Admin not found'], 404);
+        }
+        return response()->json(['admin' => $admin], 200);
+    }
+    public function edit($id)
+    {
+        $admin = Admin::find($id);
+        if (!$admin) {
+            return response()->json(['message' => 'Admin not found'], 404);
+        }
+        return response()->json(['admin' => $admin], 200);
+    }
+    public function update(Request $request, $id)
+{
+    $admin = Admin::find($id);
+    if (!$admin) {
+        return response()->json(['message' => 'Admin not found'], 404);
+    }
+
+    $data = $request->validate([
+        'nom' => 'required',
+        'prenom' => 'required',
+        'login' => 'required',
+        'password' => 'required|min:8',
+        'email' => 'required',
+        'company.nom' => 'required',
+        'company.adresse' => 'required',
+        'company.subdomaine' => 'required',
+        'company.logo' => 'nullable|image',
+    ]);
+
+    $data['password'] = bcrypt($data['password']);
+
+    // Mise à jour de l'entreprise liée à l'administrateur
+    $companyData = [
+        'nom' => $data['company']['nom'],
+        'adresse' => $data['company']['adresse'],
+        'subdomaine' => $data['company']['subdomaine'],
+        'logo' => $data['company']['logo'] ? $data['company']['logo']->store('logos') : null,
+    ];
+
+    $admin->company()->update($companyData); // Utiliser la méthode relationship pour mettre à jour la compagnie
+
+    
+    unset($data['company']); 
+    $admin->update($data);
+
+    return response()->json(['message' => 'Admin updated successfully', 'admin' => $admin], 200);
+}
+public function destroy($id)
+{
+    $admin = Admin::find($id);
+    if (!$admin) {
+        return response()->json(['message' => 'Admin not found'], 404);
+    } 
+    if ($admin->company) {
+        $admin->company->delete();
+    }
+
+    $admin->delete();
+
+    return response()->json(['message' => 'Admin and associated company deleted successfully'], 200);
+}
+
 }
