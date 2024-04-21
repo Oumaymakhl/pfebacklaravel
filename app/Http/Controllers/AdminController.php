@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Sadmin;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 class AdminController extends Controller
 {
     //
@@ -78,5 +79,11 @@ class AdminController extends Controller
         } else {
             return response()->json(['message' => 'Invalid login credentials'], 401);
         }
+    }
+    public function adminLogout(Request $request)
+    {
+        $request->session()->invalidate();
+
+        return response()->json(['message' => 'Admin logged out successfully'], 200);
     }
 }

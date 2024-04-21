@@ -11,6 +11,7 @@ use App\Models\Sadmin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserRegistrationMail;
+use Illuminate\Support\Facades\Session;
 
 
 
@@ -114,6 +115,12 @@ if ($existingUser) {
         }
         $user->delete();
         return response()->json(['message' => 'User deleted successfully'], 200);
+    }
+    public function userLogout(Request $request)
+    {
+        $request->session()->invalidate();
+
+        return response()->json(['message' => 'User logged out successfully'], 200);
     }
   
 }
