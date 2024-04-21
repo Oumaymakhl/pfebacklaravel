@@ -30,12 +30,19 @@ Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
+Route::post('/admin/refresh', [AdminController::class, 'refresh']);
+Route::post('/admin/logout', [AdminController::class, 'logout']);
+Route::get('/admin/userProfile', [AdminController::class, 'userProfile']);
+
+
 Route::post('user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
+
 Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
-Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']); 
+Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
+
 Route::get('/finds/{id}', [ReunionController::class, 'getEtat']);
 Route::post('/finds', [ReunionController::class, 'setEtat']);
 

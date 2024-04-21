@@ -8,19 +8,32 @@ use App\Models\admin;
 
 class CompanyController extends Controller
 {
+   /* public function index()
+    {
+        $companies = Company::with('admins')->get();
+        return response()->json($companies);
+    }*/
     public function index()
     {
-        $companies = Company::with('admin')->get();
-        return response()->json($companies);
+        $companies = Company::all();
+    
+    
+        return response()->json(['companies' => $companies], 200);
     }
-   
+    
  
   
-  public function show($id)
+  /*public function show($id)
     {
-        $company = Company::with('admin')->findOrFail($id);
+        $company = Company::with('admins')->findOrFail($id);
         return response()->json($company);
-    }
+    }*/
+    public function show($id)
+{
+    $company = Company::find($id);
+    return response()->json(['company' => $company ], 200);
+}
+
     /**
      * Update the specified resource in storage.
      *
@@ -28,29 +41,60 @@ class CompanyController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-  
-  public function update(Request $request, $id)
+   
+    
+ /* public function update(Request $request, $id)
   {
-      $request->validate([
+    $companies = Company::find($id);
+
+    if (!$companies) {
+        return response()->json(['message' => 'company not found.'], 404);
+    }
+
+    $data =$request->validate([
           'nom' => 'required',
-          'adresse' => 'required',
           'subdomaine' => 'required',
-          'logo' => 'required'
+          'logo' => 'nullable',
+          'adresse' => 'required'
+        
       ]);
 
-      $companies = Company::find($id);
+     
 
-      if (!$companies) {
-          return response()->json(['message' => 'company not found.'], 404);
-      }
+      $companies->update( $data);
 
-      $companies->update($request->all());
+      return response()->json(['message' => 'company updated successfully', 'company' => $companies], 200);
+    
+  }*/public function update(Request $request, $id)
+{
+    $company = Company::find($id);
 
-      return response()->json([
-          'companies' => $companies,
-          'message' => 'companies updated successfully.',
-      ], 200);
-  }
+    if (!$company) {
+        return response()->json(['message' => 'Company not found.'], 404);
+    }
+
+    $request->validate([
+        'nom' => 'required',
+        'subdomaine' => 'required',
+        'adresse' => 'required'
+    ]);
+
+    // Traitement du logo
+    if ($request->hasFile('logo')) {
+        $logo = $request->file('logo');
+        $logoPath = $logo->store('logos'); // Stocker le fichier dans le répertoire 'storage/app/logos'
+        $company->logo = $logoPath; // Enregistrez le chemin du fichier (URL) dans la base de données
+    }
+
+ 
+    $company->nom = $request->input('nom');
+    $company->subdomaine = $request->input('subdomaine');
+    $company->adresse = $request->input('adresse');
+
+    $company->save();
+
+    return response()->json(['message' => 'Company updated successfully', 'company' => $company], 200);
+}
     public function destroy($id)
     {
         $company = Company::findOrFail($id);
@@ -59,11 +103,15 @@ class CompanyController extends Controller
     
         $company->delete();
     
-        
-        if ($admin) {
-            $admin->delete();
+        if ($company->admin) {
+            $company->admin->delete();
         }
+
+        
+        return response()->json([ 'message' => 'Entreprise supprimée avec succès.'],
+         204);
+    } 
     
-        return response()->json(null, 204);
-    }
+   
+    
 }

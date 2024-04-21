@@ -14,7 +14,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => 'web',
+        'guard' => 'api',
         'passwords' => 'users',
     ],
 
@@ -56,7 +56,12 @@ return [
         'reunion' => [
             'driver' => 'session', 
             'provider' => 'reunions', 
-        ]
+        ],
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'admins',
+            'hash' => false,
+    ],
     ],
 
     /*
