@@ -7,6 +7,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ReunionController;
+use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DecisionController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\StatisticController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,3 +50,35 @@ Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
 Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
+
+Route::post('/documents/import', [DocumentController::class, 'importDocument']);
+Route::get('/documents/{id}/export', [DocumentController::class, 'exportDocument']);
+Route::get('/documents/{id}/sign', [DocumentController::class, 'signDocument']);
+Route::get('/documents/{id}/download', [DocumentController::class, 'downloadSignedDocument']);
+
+Route::get('/decisions', [DecisionController::class, 'index']);
+Route::post('/decisions', [DecisionController::class, 'store']);
+Route::get('/decisions/{id}', [DecisionController::class, 'show']);
+Route::put('/decisions/{id}', [DecisionController::class, 'update']);
+Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
+
+// Route pour liker une décision
+Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision']);
+
+// Route pour disliker une décision
+Route::post('/decisions/{decision}/dislike', [DecisionController::class, 'dislikeDecision']);
+Route::post('/decisions2/{decision}/like/{userId}', [DecisionController::class, 'likeDecision2']);
+
+// Route pour disliker une décision
+Route::post('/decisions2/{decision}/dislike/{userId}', [DecisionController::class, 'dislikeDecision2']);
+
+Route::get('/tasks', [TaskController::class, 'index']); // Afficher toutes les tâches
+Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle tâche
+Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
+Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
+Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
+
+Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
+Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
+Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasksByStatus']);
+Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
