@@ -10,13 +10,16 @@ class Company extends Model
     use HasFactory;
     protected $fillable = 
     ['nom',
-    'adresse',
       'subdomaine',
-       'logo'
+       'logo',
+       'adresse',
+       'admin_id',
      
     ]; 
-    public function admin()
+    public function admins()
     {
         return $this->hasOne(admin::class);
     }
+    
+
 }

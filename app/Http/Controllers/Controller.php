@@ -24,8 +24,8 @@ class Controller extends BaseController
         'nom' => 'required',
         'prenom' => 'required',
         'login' => 'required',
-        'password' => 'required|min:8',
-        'email' => 'required|email',
+        'password' => 'required',
+        'email' => 'required',
         'company_id' => 'required',
 
     ]);
@@ -36,7 +36,6 @@ class Controller extends BaseController
 if ($existingUser) {
     return response()->json(['message' => 'User already exists'], 422);
 }
-    // Vérifier si l'email ou le login est déjà utilisé dans les autres rôles
     if (Admin::where('email', $data['email'])->orWhere('login', $data['login'])->exists() ||
         Sadmin::where('email', $data['email'])->orWhere('login', $data['login'])->exists()) {
         return response()->json(['message' => 'Email or login already exists in other roles'], 422);
@@ -95,8 +94,8 @@ if ($existingUser) {
             'nom' => 'required',
             'prenom' => 'required',
             'login' => 'required',
-            'password' => 'required|min:8',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => 'required',
+            'email' => 'required'
         ]);
 
         $data['password'] = bcrypt($data['password']);
