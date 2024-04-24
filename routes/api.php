@@ -84,6 +84,7 @@ Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle 
 Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
 Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
+Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
 
 Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
