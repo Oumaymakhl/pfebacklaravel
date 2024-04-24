@@ -58,6 +58,7 @@ Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delet
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
 
+Route::get('/documents', [DocumentController::class, 'showDocuments']);
 Route::post('/documents/import', [DocumentController::class, 'importDocument']);
 Route::get('/documents/{id}/export', [DocumentController::class, 'exportDocument']);
 Route::get('/documents/{id}/sign', [DocumentController::class, 'signDocument']);

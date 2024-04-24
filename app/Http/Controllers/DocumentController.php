@@ -73,5 +73,13 @@ public function downloadSignedDocument($documentId)
     // Retourner le document signé en tant que réponse de téléchargement
     return response()->download(storage_path('signed_document.pdf'));
 }
+public function showDocuments()
+{
+    // Récupérer tous les documents enregistrés dans la base de données
+    $documents = Document::all();
+
+    // Retourner les documents en tant que réponse JSON
+    return response()->json($documents);
+}
 
 }
