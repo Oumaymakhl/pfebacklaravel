@@ -97,3 +97,4 @@ Route::get('/admin', [AdminController::class, 'index']);
 Route::get('/admin/{id}', [AdminController::class, 'show']);
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit']);
 Route::put('/admin/{id}', [AdminController::class, 'update']);
+Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
