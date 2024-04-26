@@ -122,5 +122,6 @@ if ($existingUser) {
 
         return response()->json(['message' => 'User logged out successfully'], 200);
     }
+    
   
 }

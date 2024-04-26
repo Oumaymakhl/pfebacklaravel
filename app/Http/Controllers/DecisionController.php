@@ -105,4 +105,15 @@ class DecisionController extends Controller
 
         return response()->json(['message' => 'Decision disliked successfully'], 200);
     }
+    public function getLikesForDecision(Decision $decision)
+    {
+        $likes = $decision->likes()->where('like', true)->get();
+        return response()->json(['likes' => $likes], 200);
+    }
+
+    public function getDislikesForDecision(Decision $decision)
+    {
+        $dislikes = $decision->likes()->where('dislike', true)->get();
+        return response()->json(['dislikes' => $dislikes], 200);
+    }
 }

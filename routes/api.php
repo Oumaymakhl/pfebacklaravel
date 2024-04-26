@@ -11,7 +11,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StatisticController;
-
+use App\Http\Controllers\LoginController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -61,6 +61,11 @@ Route::post('/decisions', [DecisionController::class, 'store']);
 Route::get('/decisions/{id}', [DecisionController::class, 'show']);
 Route::put('/decisions/{id}', [DecisionController::class, 'update']);
 Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
+// Route pour récupérer les likes d'une décision spécifique
+Route::get('/decisions/{decision}/likes', [DecisionController::class, 'getLikesForDecision']);
+
+// Route pour récupérer les dislikes d'une décision spécifique
+Route::get('/decisions/{decision}/dislikes', [DecisionController::class, 'getDislikesForDecision']);
 
 // Route pour liker une décision
 Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision']);
@@ -88,4 +93,4 @@ Route::post('user/logout', [Controller::class, 'userLogout']);
 Route::post('admin/logout', [AdminController::class, 'adminLogout']);
 
 Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
-
+Route::post('/login', [LoginController::class, 'authenticate']);
