@@ -79,10 +79,11 @@ class CompanyController extends Controller
         'adresse' => 'required'
     ]);
 
-    if ($request->hasFile('logo')) {
+     // Traitement du logo
+     if ($request->hasFile('logo')) {
         $logo = $request->file('logo');
-        $logoPath = $logo->store('logos'); 
-        $company->logo = $logoPath; 
+        $logoPath = $logo->store('logos'); // Stocker le fichier dans le répertoire 'storage/app/logos'
+        $company->logo = $logoPath; // Enregistrez le chemin du fichier (URL) dans la base de données
     }
 
  
