@@ -98,3 +98,8 @@ Route::get('/admin/{id}', [AdminController::class, 'show']);
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit']);
 Route::put('/admin/{id}', [AdminController::class, 'update']);
 Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
+Route::post('user/logout', [Controller::class, 'userLogout']);
+Route::post('admin/logout', [AdminController::class, 'adminLogout']);
+
+Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
+Route::post('/login', [LoginController::class, 'authenticate']);
