@@ -26,8 +26,11 @@ use App\Http\Controllers\StatisticController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
+Route::post('user/signup', [Controller::class, 'signup']);
+Route::post('/user/login', [Controller::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/admin/refresh', [AdminController::class, 'refresh']);
@@ -35,11 +38,8 @@ Route::post('/admin/logout', [AdminController::class, 'logout']);
 Route::get('/admin/userProfile', [AdminController::class, 'userProfile']);
 
 
-Route::post('user/signup', [Controller::class, 'signup']);
-Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
-
 Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
 Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
 
@@ -49,7 +49,6 @@ Route::post('/finds', [ReunionController::class, 'setEtat']);
 Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
-Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
 Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
 Route::post('/reunions', [ReunionController::class, 'create_reunion']); // Create
 Route::get('/reunions', [ReunionController::class, 'index']); // Read
@@ -69,14 +68,9 @@ Route::get('/decisions/{id}', [DecisionController::class, 'show']);
 Route::put('/decisions/{id}', [DecisionController::class, 'update']);
 Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
 
-// Route pour liker une décision
 Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision']);
-
-// Route pour disliker une décision
 Route::post('/decisions/{decision}/dislike', [DecisionController::class, 'dislikeDecision']);
 Route::post('/decisions2/{decision}/like/{userId}', [DecisionController::class, 'likeDecision2']);
-
-// Route pour disliker une décision
 Route::post('/decisions2/{decision}/dislike/{userId}', [DecisionController::class, 'dislikeDecision2']);
 
 Route::get('/tasks', [TaskController::class, 'index']); // Afficher toutes les tâches
@@ -89,7 +83,6 @@ Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
 Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasksByStatus']);
 Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
-
 
 Route::get('/admin', [AdminController::class, 'index']);
 Route::get('/admin/{id}', [AdminController::class, 'show']);

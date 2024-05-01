@@ -3,11 +3,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Admin;
 use App\Models\Sadmin;
+use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserRegistrationMail;
@@ -18,38 +20,51 @@ use App\Mail\UserRegistrationMail;
 class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
-    public function signup(Request $request)
+  
+public function signup(Request $request)
 {
-    $data = $request->validate([
+    $validator = Validator::make($request->all(), [
         'nom' => 'required',
         'prenom' => 'required',
         'login' => 'required',
         'password' => 'required',
         'email' => 'required',
-        'company_id' => 'required',
-
+        'company_id' => 'required|exists:companies,id',
     ]);
-    $existingUser = User::where('email', $data['email'])
-    ->orWhere('login', $data['login'])
-    ->first();
 
-if ($existingUser) {
-    return response()->json(['message' => 'User already exists'], 422);
-}
+    if ($validator->fails()) {
+        return response()->json($validator->errors()->toJson(), 400);
+    }
+
+    $data = $validator->validated();
+
+    $existingUser = User::where('email', $data['email'])->first();
+    if ($existingUser) {
+        return response()->json(['message' => 'User already exists'], 422);
+    }
+
     if (Admin::where('email', $data['email'])->orWhere('login', $data['login'])->exists() ||
         Sadmin::where('email', $data['email'])->orWhere('login', $data['login'])->exists()) {
         return response()->json(['message' => 'Email or login already exists in other roles'], 422);
     }
-
     $password = $data['password'];
-
     $data['password'] = bcrypt($data['password']);
 
-    $user = User::create($data);
+    $user = User::create([
+        'nom' => $data['nom'],
+        'prenom' => $data['prenom'],
+        'login' => $data['login'],
+        'password' => $data['password'],
+        'email' => $data['email'],
+        'company_id' =>  $data['company_id'],
+    ]);
     Mail::to($user->email)->send(new UserRegistrationMail($user, $password));
-
-    return response()->json(['message' => 'Signup successful', 'user' => $user], 201);
+    return response()->json([
+        'message' => 'Signup successful',
+        'user' => $user,
+    ], 201);
 }
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -81,9 +96,30 @@ if ($existingUser) {
     }
     return response()->json(['user' => $user], 200);
 }
+public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
 
+        $data = $request->validate([
+            'nom' => 'required',
+            'prenom' => 'required',
+            'login' => 'required',
+            'email' => 'required',
+            'company_id' => 'required|exists:companies,id',
 
-    public function update(Request $request, $id)
+        ]);
+
+        
+
+        $user->update($data);
+
+        return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
+    }
+
+   /* public function update(Request $request, $id)
     {
         $user = User::find($id);
         if (!$user) {
@@ -103,8 +139,7 @@ if ($existingUser) {
         $user->update($data);
 
         return response()->json(['message' => 'User updated successfully', 'user' => $user], 200);
-    }
-
+    }*/
     public function destroy($id)
     {
         $user = User::find($id);
