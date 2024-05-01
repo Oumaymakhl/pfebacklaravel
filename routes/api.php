@@ -57,6 +57,7 @@ Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delet
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
 
+Route::get('/documents', [DocumentController::class, 'showDocuments']);
 Route::post('/documents/import', [DocumentController::class, 'importDocument']);
 Route::get('/documents/{id}/export', [DocumentController::class, 'exportDocument']);
 Route::get('/documents/{id}/sign', [DocumentController::class, 'signDocument']);
@@ -78,6 +79,7 @@ Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle 
 Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
 Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
+Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
 
 Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
