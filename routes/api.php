@@ -106,4 +106,3 @@ Route::post('/change-password', [ChangePasswordController::class, 'passwordReset
 
 Route::get('company/details/{id}', [CompanyController::class, 'showCompanyDetails']);
 Route::get('/profile', [AdminController::class, 'profile']);
-
