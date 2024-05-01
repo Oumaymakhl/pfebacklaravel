@@ -82,4 +82,36 @@ class TaskController extends Controller
         $task->delete();
         return response()->json(['message' => 'Task deleted successfully'], 200);
     }
+    public function calculateTimeSpent($id)
+    {
+        // Find the task by ID
+        $task = Task::find($id);
+
+        // Check if the task exists
+        if (!$task) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
+
+        // Calculate the time spent
+        // Get the current time
+        $currentTime = now();
+
+        // Get the created_at time of the task
+        $createdAtTime = $task->created_at;
+
+        // Calculate the time difference in seconds
+        $timeSpentInSeconds = $currentTime->diffInSeconds($createdAtTime);
+
+        // Convert the time spent from seconds to hours or minutes (as you prefer)
+        $timeSpentInHours = $timeSpentInSeconds / 3600; // Convert seconds to hours
+        // You can use other units of time (e.g., minutes) if you prefer
+
+        // Update the task's time_spent with the calculated time spent
+        $task->time_spent = round($timeSpentInHours, 2); // rounding to 2 decimal places for better readability
+        $task->save();
+
+        // Return the updated task with the calculated time_spent
+        return response()->json(['task' => $task], 200);
+    }
 }
+

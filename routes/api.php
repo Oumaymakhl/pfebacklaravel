@@ -11,7 +11,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StatisticController;
-
+use App\Http\Controllers\LoginController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,19 +30,12 @@ Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
-Route::post('/admin/refresh', [AdminController::class, 'refresh']);
-Route::post('/admin/logout', [AdminController::class, 'logout']);
-Route::get('/admin/userProfile', [AdminController::class, 'userProfile']);
-
-
-Route::post('user/signup', [Controller::class, 'signup']);
+Route::post('/user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
-
 Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
-Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
-
+Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']); 
 Route::get('/finds/{id}', [ReunionController::class, 'getEtat']);
 Route::post('/finds', [ReunionController::class, 'setEtat']);
 
@@ -68,6 +61,11 @@ Route::post('/decisions', [DecisionController::class, 'store']);
 Route::get('/decisions/{id}', [DecisionController::class, 'show']);
 Route::put('/decisions/{id}', [DecisionController::class, 'update']);
 Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
+// Route pour récupérer les likes d'une décision spécifique
+Route::get('/decisions/{decision}/likes', [DecisionController::class, 'getLikesForDecision']);
+
+// Route pour récupérer les dislikes d'une décision spécifique
+Route::get('/decisions/{decision}/dislikes', [DecisionController::class, 'getDislikesForDecision']);
 
 // Route pour liker une décision
 Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision']);
@@ -89,10 +87,12 @@ Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
 Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasksByStatus']);
 Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
-
-
 Route::get('/admin', [AdminController::class, 'index']);
 Route::get('/admin/{id}', [AdminController::class, 'show']);
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit']);
 Route::put('/admin/{id}', [AdminController::class, 'update']);
 Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
+Route::post('user/logout', [Controller::class, 'userLogout']);
+Route::post('admin/logout', [AdminController::class, 'adminLogout']);
+Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
+Route::post('/login', [LoginController::class, 'authenticate']);
