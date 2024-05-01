@@ -15,8 +15,12 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
+        'nom',
+        'prenom',
+        'login',
+        'password', 
         'email',
-        'password',
+        'company_id',
     ];
     /**
      * The attributes that should be hidden for arrays.
@@ -51,5 +55,21 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims() {
         return [];
-    }    
+    }   
+    public function reunions()
+    {
+        return $this->belongsToMany(Reunion::class, 'presence')->withPivot('status');
+    }
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    } 
 }

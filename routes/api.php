@@ -11,7 +11,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StatisticController;
-
+use App\Http\Controllers\LoginController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,19 +30,12 @@ Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
 Route::post('/admin/login', [AdminController::class, 'login']);
-Route::post('/admin/refresh', [AdminController::class, 'refresh']);
-Route::post('/admin/logout', [AdminController::class, 'logout']);
-Route::get('/admin/userProfile', [AdminController::class, 'userProfile']);
-
-
-Route::post('user/signup', [Controller::class, 'signup']);
+Route::post('/user/signup', [Controller::class, 'signup']);
 Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
-
 Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
-Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
-
+Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']); 
 Route::get('/finds/{id}', [ReunionController::class, 'getEtat']);
 Route::post('/finds', [ReunionController::class, 'setEtat']);
 
@@ -58,7 +51,6 @@ Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delet
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
 
-Route::get('/documents', [DocumentController::class, 'showDocuments']);
 Route::post('/documents/import', [DocumentController::class, 'importDocument']);
 Route::get('/documents/{id}/export', [DocumentController::class, 'exportDocument']);
 Route::get('/documents/{id}/sign', [DocumentController::class, 'signDocument']);
@@ -69,6 +61,11 @@ Route::post('/decisions', [DecisionController::class, 'store']);
 Route::get('/decisions/{id}', [DecisionController::class, 'show']);
 Route::put('/decisions/{id}', [DecisionController::class, 'update']);
 Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
+// Route pour récupérer les likes d'une décision spécifique
+Route::get('/decisions/{decision}/likes', [DecisionController::class, 'getLikesForDecision']);
+
+// Route pour récupérer les dislikes d'une décision spécifique
+Route::get('/decisions/{decision}/dislikes', [DecisionController::class, 'getDislikesForDecision']);
 
 // Route pour liker une décision
 Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision']);
@@ -85,7 +82,6 @@ Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle 
 Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
 Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
-Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
 
 Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
