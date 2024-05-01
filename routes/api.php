@@ -89,6 +89,7 @@ Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasks
 Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
 
 
+
 Route::get('/admin', [AdminController::class, 'index']);
 Route::get('/admin/{id}', [AdminController::class, 'show']);
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit']);
