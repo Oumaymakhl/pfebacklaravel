@@ -16,11 +16,11 @@ use App\Mail\AdminRegistrationMail;
 class AdminController extends Controller
 {
    
-     public function login(Request $request)
+    public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+            'email' => 'required',
+            'password' => 'required',
         ]);
         $credentials = $request->only('email', 'password');
 
@@ -43,6 +43,21 @@ class AdminController extends Controller
             ]);
 
     }
+    /*public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'login' => 'required',
+            'password' => 'required',
+        ]);
+
+        if (Auth::guard('admin')->attempt($credentials)) {
+            $admin = Auth::guard('admin')->user();
+
+            return response()->json(['admin' => $admin], 200);
+        } else {
+            return response()->json(['message' => 'Invalid login credentials'], 401);
+        }
+    }*/
    /**
  * Register an Admin.
  *
@@ -107,11 +122,11 @@ public function signup(Request $request)
         'prenom' => 'required',
         'login' => 'required',
         'password' => 'required',
-        'email' => 'required|email',
+        'email' => 'required',
         'company.nom' => 'required',
-        'company.adresse' => 'required',
         'company.subdomaine' => 'required',
-        'company.logo' => 'nullable',
+        'company.logo' => 'required|image',
+        'company.adresse' => 'required',
     ]);
 
     if ($validator->fails()) {
@@ -119,31 +134,36 @@ public function signup(Request $request)
     }
 
     $data = $validator->validated();
-    $existingAdmin = Admin::where('email', $data['email'])->first();
 
-    if ($existingAdmin) {
-        return response()->json(['error' => 'Email already exists'], 400);
+    $existingAdminOrCompany = Admin::where('email', $data['email'])
+        ->orWhereHas('company', function($query) use ($data) {
+            $query->where('nom', $data['company']['nom'])
+                  ->where('adresse', $data['company']['adresse'])
+                  ->where('subdomaine', $data['company']['subdomaine']);
+        })->first();
+
+    if ($existingAdminOrCompany) {
+        $message = $existingAdminOrCompany->email === $data['email'] ? 'Email already exists' : 'Company already exists';
+        return response()->json(['error' => $message], 400);
     }
 
-    $existingCompany = Company::where('nom', $data['company']['nom'])
-                                ->where('adresse', $data['company']['adresse'])
-                                ->where('subdomaine', $data['company']['subdomaine'])
-                                ->whereHas('admins')
-                                ->first();
-
-    if ($existingCompany) {
-        return response()->json(['error' => 'This company is already associated with another admin'], 400);
+    // Gestion du logo de l'entreprise
+    if ($request->hasFile('company.logo')) {
+        $logo = $request->file('company.logo');
+        $logoPath = $logo->store('public'); // Stocke le fichier dans le dossier storage/app/public avec le nom de fichier original
+        $logoPath = str_replace('public/', '/storage/', $logoPath); // Remplace 'public/' par '/storage/' dans le chemin
+    } else {
+        $logoPath = null;
     }
 
     $company = Company::create([
         'nom' => $data['company']['nom'],
-        'adresse' => $data['company']['adresse'],
         'subdomaine' => $data['company']['subdomaine'],
-        'logo' => $request->file('company.logo') ? $request->file('company.logo')->store('logos') : null,
+        'logo' => $logoPath, // Enregistre le chemin du logo dans la base de données
+        'adresse' => $data['company']['adresse']
     ]);
 
-    $data['password'] = bcrypt($data['password']);
-
+    // Enregistrement de l'administrateur avec le mot de passe non crypté
     $admin = Admin::create([
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
@@ -152,6 +172,13 @@ public function signup(Request $request)
         'email' => $data['email'],
         'company_id' => $company->id,
     ]);
+    
+    // Envoyer l'e-mail après la création de l'administrateur
+    Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
+
+    // Crypter le mot de passe après l'envoi de l'e-mail
+    $admin->password = bcrypt($data['password']);
+    $admin->save();
 
     return response()->json([
         'message' => 'Signup successful',

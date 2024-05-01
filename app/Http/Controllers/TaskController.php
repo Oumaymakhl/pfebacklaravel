@@ -82,7 +82,6 @@ class TaskController extends Controller
         $task->delete();
         return response()->json(['message' => 'Task deleted successfully'], 200);
     }
-
     public function calculateTimeSpent($id)
     {
         // Find the task by ID
@@ -114,5 +113,4 @@ class TaskController extends Controller
         // Return the updated task with the calculated time_spent
         return response()->json(['task' => $task], 200);
     }
-
 }
