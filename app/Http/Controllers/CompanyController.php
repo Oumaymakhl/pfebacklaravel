@@ -28,7 +28,63 @@ use App\Mail\ResetPassword;
 class AdminController extends Controller
 {
    
+<<<<<<< HEAD
     /* public function login(Request $request)
+=======
+    
+ /* public function update(Request $request, $id)
+  {
+    $companies = Company::find($id);
+
+    if (!$companies) {
+        return response()->json(['message' => 'company not found.'], 404);
+    }
+
+    $data =$request->validate([
+          'nom' => 'required',
+          'subdomaine' => 'required',
+          'logo' => 'nullable',
+          'adresse' => 'required'
+        
+      ]);
+
+     
+
+      $companies->update( $data);
+
+      return response()->json(['message' => 'company updated successfully', 'company' => $companies], 200);
+    
+  }*/public function update(Request $request, $id)
+{
+    $company = Company::find($id);
+
+    if (!$company) {
+        return response()->json(['message' => 'Company not found.'], 404);
+    }
+
+    $request->validate([
+        'nom' => 'required',
+        'subdomaine' => 'required',
+        'adresse' => 'required'
+    ]);
+
+    if ($request->hasFile('logo')) {
+        $logo = $request->file('logo');
+        $logoPath = $logo->store('logos'); 
+        $company->logo = $logoPath; 
+    }
+
+ 
+    $company->nom = $request->input('nom');
+    $company->subdomaine = $request->input('subdomaine');
+    $company->adresse = $request->input('adresse');
+
+    $company->save();
+
+    return response()->json(['message' => 'Company updated successfully', 'company' => $company], 200);
+}
+    public function destroy($id)
+>>>>>>> 3a979f0 (1)
     {
         $request->validate([
             'email' => 'required|string|email',
@@ -44,6 +100,7 @@ class AdminController extends Controller
             ], 401);
         }
 
+<<<<<<< HEAD
         $user = Auth::user();
         return response()->json([
                 'status' => 'success',
@@ -575,3 +632,13 @@ public function profile()
 }
 
 }
+=======
+        
+        return response()->json([ 'message' => 'Entreprise supprimée avec succès.'],
+         204);
+    } 
+    
+   
+    
+}
+>>>>>>> 3a979f0 (1)

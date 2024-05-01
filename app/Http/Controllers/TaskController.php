@@ -113,5 +113,9 @@ class TaskController extends Controller
         // Return the updated task with the calculated time_spent
         return response()->json(['task' => $task], 200);
     }
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> 3a979f0 (1)
