@@ -6,13 +6,20 @@ use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use setasign\Fpdi\Fpdi;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Stream;
+use Illuminate\Support\Facades\File;
+
+
 class DocumentController extends Controller
 {
     public function importDocument(Request $request)
     {
         // Valider le fichier envoyé
         $request->validate([
-            'file' => 'required|mimes:pdf|max:2048', // PDF et taille maximale de 2 Mo
+            'file' => 'required|mimes:pdf|max:5120', // 5 Mo (5 * 1024)
+         
         ]);
         // Stocker le fichier dans le stockage Laravel
         $filePath = $request->file('file')->store('documents');
@@ -31,48 +38,52 @@ class DocumentController extends Controller
 
     // Retourner le fichier PDF à télécharger
     return response()->download(storage_path('app/' . $document->path));
-}public function signDocument($documentId)
+} public function signAndDownloadDocument($documentId)
 {
     try {
-        // Récupérer le document à signer
+        // Récupérer le document à signer à partir de l'identifiant
         $document = Document::findOrFail($documentId);
+
+        // Vérifier si le fichier PDF existe dans le chemin spécifié
+        if (!Storage::exists($document->path)) {
+            throw new \Exception('Le fichier PDF n\'existe pas dans le chemin spécifié.');
+        }
 
         // Créer une nouvelle instance FPDI
         $pdf = new Fpdi();
-        $pdf->AddPage();
 
         // Charger le document PDF existant
-        $pdf->setSourceFile(storage_path('app/' . $document->path));
-        $tplId = $pdf->importPage(1);
-        $pdf->useTemplate($tplId, 0, 0);
+        $pageCount = $pdf->setSourceFile(Storage::path($document->path));
 
-        // Ajouter une nouvelle page pour la signature
-        $pdf->AddPage();
+        // Importer toutes les pages du document PDF d'origine
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+            $tplId = $pdf->importPage($pageNumber);
+            $pdf->AddPage();
+            $pdf->useTemplate($tplId, 0, 0);
+        }
 
         // Charger l'image de la signature
         $signatureImagePath = public_path('sign.png');
-        $pdf->Image($signatureImagePath, 10, 10, 40, 15); // Adjust the coordinates and dimensions as needed
 
-        // Générer le PDF signé
-        $outputPath = storage_path('signed_document.pdf');
-        $pdf->Output($outputPath, 'F');
+        // Ajouter une nouvelle page pour la signature
+        $pdf->AddPage();
+        $pdf->Image($signatureImagePath, 10, 10, 40, 15); // Ajuster les coordonnées et les dimensions si nécessaire
 
-        // Retourner le chemin du document signé
-        return response()->json(['message' => 'Document signed successfully', 'signed_document_path' => $outputPath]);
+        // Générer le PDF signé temporairement
+        $tempFileName = 'signed_' . $document->name;
+        $tempFilePath = storage_path('app/signed_documents/' . $tempFileName);
+        $pdf->Output($tempFilePath, 'F');
+
+        // Retourner le fichier signé en tant que réponse de téléchargement
+        return response()->download($tempFilePath, $tempFileName)->deleteFileAfterSend();
+
     } catch (\Exception $e) {
+        // En cas d'erreur, retourner une réponse d'erreur
         return response()->json(['error' => $e->getMessage()], 500);
     }
 }
 
-
-public function downloadSignedDocument($documentId)
-{
-    // Récupérer le document signé
-    $document = Document::findOrFail($documentId);
-
-    // Retourner le document signé en tant que réponse de téléchargement
-    return response()->download(storage_path('signed_document.pdf'));
-}
+ // Chemin de destination pour le téléchargement
 public function showDocuments()
 {
     // Récupérer tous les documents enregistrés dans la base de données

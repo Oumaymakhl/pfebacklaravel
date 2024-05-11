@@ -113,5 +113,23 @@ class TaskController extends Controller
         // Return the updated task with the calculated time_spent
         return response()->json(['task' => $task], 200);
     }
+    public function updateStatus(Request $request, Task $task)
+    {
+        // Vérifiez si l'utilisateur actuel est autorisé à modifier cette tâche
+        if ($task->user_id !== $request->user_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Validez la demande
+        $request->validate([
+            'status' => ['required', Rule::in(['todo', 'completed'])], // Assurez-vous que le statut est valide
+        ]);
+
+        // Mettez à jour le statut de la tâche
+        $task->status = $request->status;
+        $task->save();
+
+        return response()->json(['message' => 'Task status updated successfully']);
+    }
 }
 
