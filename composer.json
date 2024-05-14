@@ -10,11 +10,13 @@
         "beyondcode/laravel-websockets": "^1.14",
         "fpdf/fpdf": "^1.86",
         "guzzlehttp/guzzle": "^7.2",
+        "guzzlehttp/psr7": "^2.6",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "pusher/pusher-php-server": "^7.2",
         "setasign/fpdi": "^2.6",
+        "tecnickcom/tcpdf": "^6.7",
         "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {

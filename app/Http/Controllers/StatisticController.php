@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Reunion;
 use App\Models\User;
 use App\Models\Task;
+use App\Models\company;
 
 class StatisticController extends Controller
 {
@@ -53,6 +54,55 @@ class StatisticController extends Controller
         return response()->json(['task_completion_rate_by_user' => $users], 200);
     }
 
-    
+    public function getAverageTasksPerUser()
+{
+    $averageTasksPerUser = Task::count() / User::count();
+
+    return response()->json([
+        'average_tasks_per_user' => $averageTasksPerUser,
+    ], 200);
+}
+public function getUsersByCompany()
+{
+    $usersByCompany = User::select('company_id', \DB::raw('count(*) as count'))
+                           ->groupBy('company_id')
+                           ->get();
+
+    return response()->json([
+        'users_by_company' => $usersByCompany,
+    ], 200);
+}
+public function getTasksCompletedVsIncomplete()
+{
+    $tasksCompleted = Task::where('status', 'completed')->count();
+    $tasksToDo = Task::where('status', 'to_do')->count();
+
+    return response()->json([
+        'completed_tasks_count' => $tasksCompleted,
+        'tasks_to_do_count' => $tasksToDo,
+    ], 200);
+}
+public function getTasksPerUser()
+{
+    $tasksPerUser = Task::select('user_id', \DB::raw('count(*) as count'))
+                        ->groupBy('user_id')
+                        ->get();
+
+    return response()->json([
+        'tasks_per_user' => $tasksPerUser,
+    ], 200);
+}
+public function getCompletedTasksPerUser()
+{
+    $completedTasksPerUser = Task::where('status', 'completed')
+                                  ->select('user_id', \DB::raw('count(*) as count'))
+                                  ->groupBy('user_id')
+                                  ->get();
+
+    return response()->json([
+        'completed_tasks_per_user' => $completedTasksPerUser,
+    ], 200);
+}
+
 }
 

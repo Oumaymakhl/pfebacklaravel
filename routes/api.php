@@ -55,11 +55,12 @@ Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delet
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
 
-Route::post('/documents/import', [DocumentController::class, 'importDocument']);
-Route::get('/documents/{id}/export', [DocumentController::class, 'exportDocument']);
-Route::get('/documents/{id}/sign', [DocumentController::class, 'signDocument']);
-Route::get('/documents/{id}/download', [DocumentController::class, 'downloadSignedDocument']);
-
+Route::post('import-document', [DocumentController::class, 'importDocument']);
+Route::get('export-document/{documentId}', [DocumentController::class, 'exportDocument']);
+Route::get('download-signed-document/{documentId}', [DocumentController::class, 'downloadSignedDocument']);
+Route::post('sign-document/{documentId}', [DocumentController::class, 'signDocument']); 
+Route::get('/documents/{documentId}/sign-and-download', [DocumentController::class, 'signAndDownloadDocument']);
+Route::get('show-documents', [DocumentController::class, 'showDocuments']);
 Route::get('/decisions', [DecisionController::class, 'index']);
 Route::post('/decisions', [DecisionController::class, 'store']);
 Route::get('/decisions/{id}', [DecisionController::class, 'show']);
@@ -86,11 +87,19 @@ Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle 
 Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
 Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
+Route::put('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
+
 
 Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
 Route::get('/statistics/tasks-by-status', [StatisticController::class, 'getTasksByStatus']);
 Route::get('/statistics/task-completion-rate-by-user', [StatisticController::class, 'taskCompletionRateByUser']);
+Route::get('/statistics/average-tasks-per-user', [StatisticController::class, 'getAverageTasksPerUser']);
+Route::get('/statistics/users-by-company', [StatisticController::class, 'getUsersByCompany']);
+Route::get('/statistics/tasks-completed-vs-incomplete', [StatisticController::class, 'getTasksCompletedVsIncomplete']);
+Route::get('/statistics/tasks-per-user', [StatisticController::class, 'getTasksPerUser']);
+Route::get('/statistics/completed-tasks-per-user', [StatisticController::class, 'getCompletedTasksPerUser']);
+
 Route::get('/admin', [AdminController::class, 'index']);
 Route::get('/admin/{id}', [AdminController::class, 'show']);
 Route::get('/admin/{id}/edit', [AdminController::class, 'edit']);
