@@ -111,6 +111,13 @@ class CompanyController extends Controller
          204);
     } 
     
-   
-    
+  
+    public function showCompanyDetails($id)
+    {
+        $company = Company::with('admin')->findOrFail($id);
+
+        return response()->json(['company' => $company]);
+    }
 }
+
+

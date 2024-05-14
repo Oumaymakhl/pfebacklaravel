@@ -41,16 +41,19 @@ return [
             'provider' => 'users',
         ],
         'user' => [
-            'driver' => 'session', 
-            'provider' => 'users', 
+            'driver' => 'jwt', // Utiliser JWT au lieu de la session
+            'provider' => 'users',
+            'hash' => false,
         ],
         'sadmin' => [
-            'driver' => 'session', 
-            'provider' => 'sadmins', 
+            'driver' => 'jwt', // Utiliser JWT au lieu de la session
+            'provider' => 'sadmins',
+            'hash' => false,
         ],
         'admin' => [
-            'driver' => 'session', 
-            'provider' => 'admins', 
+            'driver' => 'jwt', // Utiliser JWT au lieu de la session
+            'provider' => 'admins',
+            'hash' => false,
         ],
         
         'reunion' => [
@@ -61,7 +64,7 @@ return [
             'driver' => 'jwt',
             'provider' => 'admins',
             'hash' => false,
-    ],
+        ],
     ],
 
     /*
@@ -100,12 +103,6 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\reunion::class,
         ],
-
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*

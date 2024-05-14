@@ -28,3 +28,10 @@ Route::get('/get-messages/{senderId}/{receiverId}', [App\Http\Controllers\ChatCo
 
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+
+
+
+
