@@ -19,8 +19,8 @@ class SadminController extends Controller
         'nom' => 'required',
         'prenom' => 'required',
         'login' => 'required',
-        'password' => 'required|min:8',
-        'email' => 'required|email',
+        'password' => 'required',
+        'email' => 'required|',
     ]);
     $existingUser = Sadmin::where('email', $data['email'])
     ->orWhere('login', $data['login'])
@@ -43,7 +43,7 @@ if ($existingUser) {
 
     return response()->json(['message' => 'Signup successful', 'sadmin' => $sadmin], 201);
 }
-    public function login(Request $request)
+    /*public function login(Request $request)
     {
         $credentials = $request->validate([
             'login' => 'required',
@@ -57,5 +57,5 @@ if ($existingUser) {
         } else {
             return response()->json(['message' => 'Invalid login credentials'], 401);
         }
-    }
+    }*/
 }

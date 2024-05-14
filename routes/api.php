@@ -1,8 +1,11 @@
 <?php
+use \App\Http\Middleware\CheckCompanyAdmin;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SadminController;
+use App\Http\Controllers\PasswordResetRequestController;
+use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CompanyController;
@@ -11,7 +14,9 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DecisionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StatisticController;
+
 use App\Http\Controllers\LoginController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,8 +34,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
-Route::post('/admin/login', [AdminController::class, 'login']);
-Route::post('/user/signup', [Controller::class, 'signup']);
+Route::post('/admin/login', [AdminController::class, 'authenticate']);
+Route::post('/forget', [Controller::class, 'forgetpassword']);
 Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
@@ -39,10 +44,10 @@ Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
 Route::get('/finds/{id}', [ReunionController::class, 'getEtat']);
 Route::post('/finds', [ReunionController::class, 'setEtat']);
 
+Route::post('/user/signup', [Controller::class, 'signup']); // Changed this line
 Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
-Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
 Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
 Route::post('/reunions', [ReunionController::class, 'create_reunion']); // Create
 Route::get('/reunions', [ReunionController::class, 'index']); // Read
@@ -95,4 +100,10 @@ Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
 Route::post('user/logout', [Controller::class, 'userLogout']);
 Route::post('admin/logout', [AdminController::class, 'adminLogout']);
 Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
-Route::post('/login', [LoginController::class, 'authenticate']);
+
+Route::post('/reset-password-request', [PasswordResetRequestController::class, 'sendPasswordResetEmail']);
+Route::post('/change-password', [ChangePasswordController::class, 'passwordResetProcess']);
+
+Route::get('company/details/{id}', [CompanyController::class, 'showCompanyDetails']);
+Route::get('/profile', [AdminController::class, 'profile']);
+

@@ -70,10 +70,9 @@ class ReunionController extends Controller
 
     public function getEtat($id)
     {
-        // Retrieve the reunion object
         $reunion = Reunion::find($id);
     
-        // Check if the reunion exists
+       
         if (!$reunion) {
             return response()->json(['error' => 'Reunion not found'], 404); // Or handle the case where the reunion doesn't exist
         }
@@ -115,7 +114,6 @@ class ReunionController extends Controller
             return response()->json(['error' => 'Reunion not found'], 404);
         }
     
-        // Update or create presence record using DB facade
         DB::table('presence')->updateOrInsert(
             ['user_id' => $user->id, 'reunion_id' => $reunionId],
             ['status' => $request->input('status'), 'raison' => $request->input('raison')]
@@ -126,26 +124,22 @@ class ReunionController extends Controller
 
     public function inviteUsers(Request $request)
     {
-        // Valider les données de la requête
+        
         $request->validate([
             'reunion_id' => 'required',
             'user_id' => 'required',
         ]);
         try {
-            // Trouver la réunion
+            
             $reunion = Reunion::find($request->reunion_id);
-            // Récupérer les IDs des utilisateurs à inviter
             $userId = $request->user_id;
             
-            // Trouver les utilisateurs correspondants aux IDs
             $user = User::find($userId);    
-            // Envoyer une invitation à chaque utilisateur et les attacher à la réunion
                 Mail::to($user->email)->send(new InvitationMail($reunion));
-               /*  $reunion->invitedUsers()->attach($user->id);  */
             
                return response()->json(['message' => 'Invitations sent successfully to ',$user->email ], 200);
         } catch (\Exception $e) {
-            // Réponse JSON en cas d'erreur
+            
             return response()->json(['message' => 'Failed to send invitations', 'error' => $e->getMessage()], 500);
         }
     }

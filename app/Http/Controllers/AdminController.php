@@ -1,26 +1,38 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Exception;
+use Illuminate\Support\Facades\Hash;
+use PharIo\Manifest\Email;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\admin;
+use App\Models\passwordreset;
+
 use Illuminate\Validation\Rule;
 use App\Models\Company;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminRegistrationMail;
+use Illuminate\Support\Facades\Log; 
+use App\Models\User;
+use Illuminate\Support\Str;
 
+use App\Models\Sadmin;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\URL;
+use App\Mail\ResetPassword;
 
 
 class AdminController extends Controller
 {
    
-    public function login(Request $request)
+    /* public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required',
-            'password' => 'required',
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ]);
         $credentials = $request->only('email', 'password');
 
@@ -42,21 +54,6 @@ class AdminController extends Controller
                 ]
             ]);
 
-    }
-    /*public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'login' => 'required',
-            'password' => 'required',
-        ]);
-
-        if (Auth::guard('admin')->attempt($credentials)) {
-            $admin = Auth::guard('admin')->user();
-
-            return response()->json(['admin' => $admin], 200);
-        } else {
-            return response()->json(['message' => 'Invalid login credentials'], 401);
-        }
     }*/
    /**
  * Register an Admin.
@@ -135,35 +132,41 @@ public function signup(Request $request)
 
     $data = $validator->validated();
 
-    $existingAdminOrCompany = Admin::where('email', $data['email'])
-        ->orWhereHas('company', function($query) use ($data) {
-            $query->where('nom', $data['company']['nom'])
-                  ->where('adresse', $data['company']['adresse'])
-                  ->where('subdomaine', $data['company']['subdomaine']);
-        })->first();
+    $existingAdminOrCompany = Company::where('subdomaine', $data['company']['subdomaine'])
+        ->orWhere('nom', $data['company']['nom'])
+        ->orWhere('adresse', $data['company']['adresse'])
+        ->first();
 
     if ($existingAdminOrCompany) {
-        $message = $existingAdminOrCompany->email === $data['email'] ? 'Email already exists' : 'Company already exists';
-        return response()->json(['error' => $message], 400);
+        return response()->json(['error' => 'Company already exists'], 400);
     }
 
-    // Gestion du logo de l'entreprise
-    if ($request->hasFile('company.logo')) {
-        $logo = $request->file('company.logo');
-        $logoPath = $logo->store('public'); // Stocke le fichier dans le dossier storage/app/public avec le nom de fichier original
-        $logoPath = str_replace('public/', '/storage/', $logoPath); // Remplace 'public/' par '/storage/' dans le chemin
-    } else {
-        $logoPath = null;
+    if (Admin::where('email', $data['email'])->exists()) {
+        return response()->json(['error' => 'Email already exists'], 400);
     }
 
-    $company = Company::create([
-        'nom' => $data['company']['nom'],
-        'subdomaine' => $data['company']['subdomaine'],
-        'logo' => $logoPath, // Enregistre le chemin du logo dans la base de données
-        'adresse' => $data['company']['adresse']
-    ]);
+    if (Admin::where('login', $data['login'])->exists()) {
+        return response()->json(['error' => 'Login already exists'], 400);
+    }
 
-    // Enregistrement de l'administrateur avec le mot de passe non crypté
+    // ...
+if ($request->hasFile('company.logo')) {
+    $logo = $request->file('company.logo');
+    $logoPath = $logo->store('public');
+    $logoPath = str_replace('public/', '/storage/', $logoPath); // Remplacez cette ligne
+} else {
+    $logoPath = null;
+}
+
+$company = Company::create([
+    'nom' => $data['company']['nom'],
+    'subdomaine' => $data['company']['subdomaine'],
+    'logo' => str_replace('/storage/', 'storage/', $logoPath), // Modifiez cette ligne
+    'adresse' => $data['company']['adresse'],
+]);
+// ...
+
+
     $admin = Admin::create([
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
@@ -172,11 +175,12 @@ public function signup(Request $request)
         'email' => $data['email'],
         'company_id' => $company->id,
     ]);
-    
-    // Envoyer l'e-mail après la création de l'administrateur
+    // Mettez à jour également admin_id dans la table companies
+    $company->admin_id = $admin->id;
+    $company->save();
+
     Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
 
-    // Crypter le mot de passe après l'envoi de l'e-mail
     $admin->password = bcrypt($data['password']);
     $admin->save();
 
@@ -186,6 +190,7 @@ public function signup(Request $request)
         'company' => $company,
     ], 201);
 }
+
 
 
  /**
@@ -326,6 +331,247 @@ public function destroy($id)
     $admin->delete();
 
     return response()->json(['message' => 'Admin and associated company deleted successfully'], 200);
+}
+/*public function authenticate(Request $request)
+{
+    $request->validate([
+        'login' => 'required',
+        'password' => 'required',
+    ]);
+
+    $user = null;
+    $type = null;
+
+    if (!$user) {
+        $user = User::where('login', $request->login)->first();
+
+        if (!$user) {
+            $username = explode('@', $request->login)[0]; // Get the username part
+            Log::info("Username without domain: ".$username); // Log the username without domain
+            $user = User::where('login', $username)->first();
+            Log::info("User found with username: ".json_encode($user)); // Log the user found with username
+        }
+
+        $type = $user ? 'user' : $type;
+    }
+
+    if (!$user) {
+        $user = Admin::where('login', $request->login)->first();
+        $type = $user ? 'admin' : $type;
+
+        if (!$user) {
+            $username = explode('@', $request->login)[0]; // Get the username part
+            $user = Admin::where('login', $username)->first();
+        }
+    }
+
+    if (!$user) {
+        $user = Sadmin::where('login', $request->login)->first();
+        $type = $user ? 'superadmin' : $type;
+
+        if (!$user) {
+            $username = explode('@', $request->login)[0]; // Get the username part
+            $user = Sadmin::where('login', $username)->first();
+        }
+    }
+
+    if ($user && Hash::check($request->password, $user->password)) {
+        $token = JWTAuth::fromUser($user);
+        
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'type' => $type,
+            'token' => $token
+        ]);
+    }
+        return response()->json([
+        'success' => false,
+        'message' => 'Invalid credentials'
+    ], 401);
+}*/
+public function authenticate(Request $request)
+{
+    $request->validate([
+        'login' => 'required',
+        'password' => 'required',
+    ]);
+
+    $user = null;
+    $type = null;
+
+    if (!$user) {
+        $user = User::where('login', $request->login)->first();
+
+        if (!$user) {
+            $username = explode('@', $request->login)[0]; // Get the username part
+            Log::info("Username without domain: ".$username); // Log the username without domain
+            $user = User::where('login', $username)->first();
+            Log::info("User found with username: ".json_encode($user)); // Log the user found with username
+        }
+
+        $type = $user ? 'user' : $type;
+    }
+
+    if (!$user) {
+        $user = Admin::where('login', $request->login)->first();
+        $type = $user ? 'admin' : $type;
+
+        if (!$user) {
+            $username = explode('@', $request->login)[0]; // Get the username part
+            $user = Admin::where('login', $username)->first();
+        }
+    }
+
+    if (!$user) {
+        $user = Sadmin::where('login', $request->login)->first();
+        $type = $user ? 'superadmin' : $type;
+
+        if (!$user) {
+            $username = explode('@', $request->login)[0]; // Get the username part
+            $user = Sadmin::where('login', $username)->first();
+        }
+    }
+
+    if ($user && Hash::check($request->password, $user->password)) {
+        $token = JWTAuth::claims(['type' => $type])->fromUser($user);
+        
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'type' => $type,
+            'token' => $token
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Invalid credentials'
+    ], 401);
+}
+
+/*public function profile()
+{
+    $token = JWTAuth::getToken();
+    $payload = JWTAuth::getPayload($token)->toArray();
+    $type = $payload['type'];
+    $id = $payload['sub'];
+
+    switch ($type) {
+        case 'admin':
+            $profile = Admin::find($id);
+            break;
+        case 'superadmin':
+            $profile = Sadmin::find($id);
+            break;
+        case 'user':
+        default:
+            $profile = User::find($id);
+            break;
+    }
+
+    if (!$profile) {
+        return response()->json(['message' => 'Profile not found'], 404);
+    }
+
+    return response()->json(['profile' => $profile], 200);
+}
+
+
+/*public function profile($id)
+{
+    $user = null;
+    $type = null;
+
+    if (!$user) {
+        $user = User::find($id);
+        $type = $user ? 'user' : $type;
+    }
+
+    if (!$user) {
+        $user = Admin::find($id);
+        $type = $user ? 'admin' : $type;
+    }
+
+    if (!$user) {
+        $user = Sadmin::find($id);
+        $type = $user ? 'superadmin' : $type;
+    }
+
+    if (!$type) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    switch ($type) {
+        case 'user':
+            $profile = User::find($id);
+            break;
+        case 'admin':
+            $profile = Admin::find($id);
+            break;
+        case 'superadmin':
+            $profile = Sadmin::find($id);
+            break;
+    }
+
+    if (!$profile) {
+        return response()->json(['message' => 'Profile not found'], 404);
+    }
+
+    return response()->json(['profile' => $profile], 200);
+}
+*/
+public function profile()
+{
+    $token = JWTAuth::getToken();
+    $payload = JWTAuth::getPayload($token)->toArray();
+    $type = $payload['type'];
+    $id = $payload['sub'];
+
+    switch ($type) {
+        case 'admin':
+            $user = Admin::find($id);
+            break;
+        case 'superadmin':
+            $user = Sadmin::find($id);
+            break;
+        case 'user':
+        default:
+            $user = User::find($id);
+            break;
+    }
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    $profile = [
+        'id' => $user->id,
+        'nom' => $user->nom,
+        'prenom' => $user->prenom,
+        'login' => $user->login,
+        'email' => $user->email,
+        'created_at' => $user->created_at,
+        'updated_at' => $user->updated_at,
+        'company_id' => $user->company_id,
+    ];
+
+    if ($user->company_id) {
+        $company = Company::find($user->company_id);
+        if ($company) {
+            $profile['company'] = [
+                'id' => $company->id,
+                'nom' => $company->nom,
+                'subdomaine' => $company->subdomaine,
+                'logo' => $company->logo,
+                'created_at' => $company->created_at,
+                'updated_at' => $company->updated_at,
+                'adresse' => $company->adresse,
+            ];
+        }
+    }
+
+    return response()->json(['profile' => $profile], 200);
 }
 
 }
