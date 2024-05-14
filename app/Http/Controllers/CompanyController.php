@@ -39,7 +39,53 @@ class AdminController extends Controller
     if (!$companies) {
         return response()->json(['message' => 'company not found.'], 404);
     }
+    if (!$companies) {
+        return response()->json(['message' => 'company not found.'], 404);
+    }
 
+    $data =$request->validate([
+          'nom' => 'required',
+          'subdomaine' => 'required',
+          'logo' => 'nullable',
+          'adresse' => 'required'
+        
+      ]);
+
+     
+
+      $companies->update( $data);
+
+      return response()->json(['message' => 'company updated successfully', 'company' => $companies], 200);
+    
+  }*/public function update(Request $request, $id)
+{
+    $company = Company::find($id);
+
+    if (!$company) {
+        return response()->json(['message' => 'Company not found.'], 404);
+    }
+
+    $request->validate([
+        'nom' => 'required',
+        'subdomaine' => 'required',
+        'adresse' => 'required'
+    ]);
+
+    if ($request->hasFile('logo')) {
+        $logo = $request->file('logo');
+        $logoPath = $logo->store('logos'); 
+        $company->logo = $logoPath; 
+    }
+
+ 
+    $company->nom = $request->input('nom');
+    $company->subdomaine = $request->input('subdomaine');
+    $company->adresse = $request->input('adresse');
+
+    $company->save();
+
+    return response()->json(['message' => 'Company updated successfully', 'company' => $company], 200);
+}
     $data =$request->validate([
           'nom' => 'required',
           'subdomaine' => 'required',

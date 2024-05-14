@@ -7,6 +7,7 @@ use PharIo\Manifest\Email;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
 use App\Models\admin;
 use App\Models\passwordreset;
 
@@ -116,6 +117,25 @@ class AdminController extends Controller
 
     $data['password'] = bcrypt($data['password']);
 
+    $admin = Admin::create([
+        'nom' => $data['nom'],
+        'prenom' => $data['prenom'],
+        'login' => $data['login'],
+        'password' => $data['password'],
+        'email' => $data['email'],
+        'company_id' => $company->id,
+    ]);
+
+    // Envoyer un e-mail d'inscription
+    Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
+
+    return response()->json([
+        'message' => 'Signup successful',
+        'admin' => $admin,
+        'company' => $company,
+    ], 201);
+}*/
+public function signup(Request $request)
     $admin = Admin::create([
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
@@ -341,13 +361,16 @@ public function index()
         'company.logo' => 'nullable|image',
     ]);
 
+
     $data['password'] = bcrypt($data['password']);
 
+    $companyData = [
     $companyData = [
         'nom' => $data['company']['nom'],
         'adresse' => $data['company']['adresse'],
         'subdomaine' => $data['company']['subdomaine'],
         'logo' => $data['company']['logo'] ? $data['company']['logo']->store('logos') : null,
+    ];
     ];
 
     $admin->company()->update($companyData); // Utiliser la méthode relationship pour mettre à jour la compagnie
