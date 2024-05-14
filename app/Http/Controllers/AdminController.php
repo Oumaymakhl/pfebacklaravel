@@ -132,41 +132,35 @@ public function signup(Request $request)
 
     $data = $validator->validated();
 
-    $existingAdminOrCompany = Company::where('subdomaine', $data['company']['subdomaine'])
-        ->orWhere('nom', $data['company']['nom'])
-        ->orWhere('adresse', $data['company']['adresse'])
-        ->first();
+    $existingAdminOrCompany = Admin::where('email', $data['email'])
+        ->orWhereHas('company', function($query) use ($data) {
+            $query->where('nom', $data['company']['nom'])
+                  ->where('adresse', $data['company']['adresse'])
+                  ->where('subdomaine', $data['company']['subdomaine']);
+        })->first();
 
     if ($existingAdminOrCompany) {
-        return response()->json(['error' => 'Company already exists'], 400);
+        $message = $existingAdminOrCompany->email === $data['email'] ? 'Email already exists' : 'Company already exists';
+        return response()->json(['error' => $message], 400);
     }
 
-    if (Admin::where('email', $data['email'])->exists()) {
-        return response()->json(['error' => 'Email already exists'], 400);
+    // Gestion du logo de l'entreprise
+    if ($request->hasFile('company.logo')) {
+        $logo = $request->file('company.logo');
+        $logoPath = $logo->store('public'); // Stocke le fichier dans le dossier storage/app/public avec le nom de fichier original
+        $logoPath = str_replace('public/', '/storage/', $logoPath); // Remplace 'public/' par '/storage/' dans le chemin
+    } else {
+        $logoPath = null;
     }
 
-    if (Admin::where('login', $data['login'])->exists()) {
-        return response()->json(['error' => 'Login already exists'], 400);
-    }
+    $company = Company::create([
+        'nom' => $data['company']['nom'],
+        'subdomaine' => $data['company']['subdomaine'],
+        'logo' => $logoPath, // Enregistre le chemin du logo dans la base de données
+        'adresse' => $data['company']['adresse']
+    ]);
 
-    // ...
-if ($request->hasFile('company.logo')) {
-    $logo = $request->file('company.logo');
-    $logoPath = $logo->store('public');
-    $logoPath = str_replace('public/', '/storage/', $logoPath); // Remplacez cette ligne
-} else {
-    $logoPath = null;
-}
-
-$company = Company::create([
-    'nom' => $data['company']['nom'],
-    'subdomaine' => $data['company']['subdomaine'],
-    'logo' => str_replace('/storage/', 'storage/', $logoPath), // Modifiez cette ligne
-    'adresse' => $data['company']['adresse'],
-]);
-// ...
-
-
+    // Enregistrement de l'administrateur avec le mot de passe non crypté
     $admin = Admin::create([
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
@@ -175,12 +169,11 @@ $company = Company::create([
         'email' => $data['email'],
         'company_id' => $company->id,
     ]);
-    // Mettez à jour également admin_id dans la table companies
-    $company->admin_id = $admin->id;
-    $company->save();
-
+    
+    // Envoyer l'e-mail après la création de l'administrateur
     Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
 
+    // Crypter le mot de passe après l'envoi de l'e-mail
     $admin->password = bcrypt($data['password']);
     $admin->save();
 
