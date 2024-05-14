@@ -7,6 +7,7 @@ use PharIo\Manifest\Email;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
 use App\Models\admin;
 use App\Models\passwordreset;
 
@@ -28,11 +29,15 @@ use App\Mail\ResetPassword;
 class AdminController extends Controller
 {
    
+<<<<<<< HEAD
     /* public function login(Request $request)
+=======
+    public function login(Request $request)
+>>>>>>> 3a979f0 (1)
     {
         $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+            'email' => 'required',
+            'password' => 'required',
         ]);
         $credentials = $request->only('email', 'password');
 
@@ -54,6 +59,24 @@ class AdminController extends Controller
                 ]
             ]);
 
+<<<<<<< HEAD
+=======
+    }
+    /*public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'login' => 'required',
+            'password' => 'required',
+        ]);
+
+        if (Auth::guard('admin')->attempt($credentials)) {
+            $admin = Auth::guard('admin')->user();
+
+            return response()->json(['admin' => $admin], 200);
+        } else {
+            return response()->json(['message' => 'Invalid login credentials'], 401);
+        }
+>>>>>>> 3a979f0 (1)
     }*/
    /**
  * Register an Admin.
@@ -113,6 +136,25 @@ class AdminController extends Controller
     ], 201);
 }*/
 public function signup(Request $request)
+    $admin = Admin::create([
+        'nom' => $data['nom'],
+        'prenom' => $data['prenom'],
+        'login' => $data['login'],
+        'password' => $data['password'],
+        'email' => $data['email'],
+        'company_id' => $company->id,
+    ]);
+
+    // Envoyer un e-mail d'inscription
+    Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
+
+    return response()->json([
+        'message' => 'Signup successful',
+        'admin' => $admin,
+        'company' => $company,
+    ], 201);
+}*/
+public function signup(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'nom' => 'required',
@@ -132,6 +174,7 @@ public function signup(Request $request)
 
     $data = $validator->validated();
 
+<<<<<<< HEAD
     $existingAdminOrCompany = Company::where('subdomaine', $data['company']['subdomaine'])
         ->orWhere('nom', $data['company']['nom'])
         ->orWhere('adresse', $data['company']['adresse'])
@@ -167,6 +210,37 @@ $company = Company::create([
 // ...
 
 
+=======
+    $existingAdminOrCompany = Admin::where('email', $data['email'])
+        ->orWhereHas('company', function($query) use ($data) {
+            $query->where('nom', $data['company']['nom'])
+                  ->where('adresse', $data['company']['adresse'])
+                  ->where('subdomaine', $data['company']['subdomaine']);
+        })->first();
+
+    if ($existingAdminOrCompany) {
+        $message = $existingAdminOrCompany->email === $data['email'] ? 'Email already exists' : 'Company already exists';
+        return response()->json(['error' => $message], 400);
+    }
+
+    // Gestion du logo de l'entreprise
+    if ($request->hasFile('company.logo')) {
+        $logo = $request->file('company.logo');
+        $logoPath = $logo->store('public'); // Stocke le fichier dans le dossier storage/app/public avec le nom de fichier original
+        $logoPath = str_replace('public/', '/storage/', $logoPath); // Remplace 'public/' par '/storage/' dans le chemin
+    } else {
+        $logoPath = null;
+    }
+
+    $company = Company::create([
+        'nom' => $data['company']['nom'],
+        'subdomaine' => $data['company']['subdomaine'],
+        'logo' => $logoPath, // Enregistre le chemin du logo dans la base de données
+        'adresse' => $data['company']['adresse']
+    ]);
+
+    // Enregistrement de l'administrateur avec le mot de passe non crypté
+>>>>>>> 3a979f0 (1)
     $admin = Admin::create([
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
@@ -175,12 +249,20 @@ $company = Company::create([
         'email' => $data['email'],
         'company_id' => $company->id,
     ]);
+<<<<<<< HEAD
     // Mettez à jour également admin_id dans la table companies
     $company->admin_id = $admin->id;
     $company->save();
 
     Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
 
+=======
+    
+    // Envoyer l'e-mail après la création de l'administrateur
+    Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
+
+    // Crypter le mot de passe après l'envoi de l'e-mail
+>>>>>>> 3a979f0 (1)
     $admin->password = bcrypt($data['password']);
     $admin->save();
 
@@ -279,13 +361,16 @@ public function index()
         'company.logo' => 'nullable|image',
     ]);
 
+
     $data['password'] = bcrypt($data['password']);
 
+    $companyData = [
     $companyData = [
         'nom' => $data['company']['nom'],
         'adresse' => $data['company']['adresse'],
         'subdomaine' => $data['company']['subdomaine'],
         'logo' => $data['company']['logo'] ? $data['company']['logo']->store('logos') : null,
+    ];
     ];
 
     $admin->company()->update($companyData); // Utiliser la méthode relationship pour mettre à jour la compagnie
@@ -339,6 +424,7 @@ public function destroy($id)
         'password' => 'required',
     ]);
 
+<<<<<<< HEAD
     $user = null;
     $type = null;
 
@@ -574,4 +660,6 @@ public function profile()
     return response()->json(['profile' => $profile], 200);
 }
 
+=======
+>>>>>>> 3a979f0 (1)
 }

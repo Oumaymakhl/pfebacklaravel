@@ -14,10 +14,7 @@ use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserRegistrationMail;
-use App\Models\passwordreset;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Session;
 
 use Illuminate\Support\Facades\DB; 
 
@@ -102,6 +99,12 @@ class Controller extends BaseController
         $user->delete();
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
+    public function userLogout(Request $request)
+    {
+        $request->session()->invalidate();
 
+        return response()->json(['message' => 'User logged out successfully'], 200);
+    }
+    
   
 }
