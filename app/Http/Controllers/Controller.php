@@ -105,6 +105,18 @@ class Controller extends BaseController
 
         return response()->json(['message' => 'User logged out successfully'], 200);
     }
-    
+    public function getUserNameById($id)
+{
+    // Récupérer l'utilisateur par son ID
+    $user = User::find($id);
+
+    if (!$user) {
+        return response()->json(['error' => 'Utilisateur non trouvé'], 404);
+    }
+
+    // Retourner le nom complet en une seule ligne
+    return response()->json(['fullName' => $user->nom . ' ' . $user->prenom]);
+}
+
   
 }

@@ -82,6 +82,12 @@ class TaskController extends Controller
         $task->delete();
         return response()->json(['message' => 'Task deleted successfully'], 200);
     }
+    public function updateStatus(Request $request, $id)
+    {
+        $task = Task::findOrFail($id);
+        $task->update(['status' => $request->input('status')]);
+        return response()->json($task);
+    }
     public function calculateTimeSpent($id)
     {
         // Find the task by ID
