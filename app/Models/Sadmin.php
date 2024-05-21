@@ -15,7 +15,7 @@ class Sadmin extends Authenticatable  implements JWTSubject
         'prenom',
         'login',
         'password', 
-        'email',
+        'email','profile_photo'
         
     ];
     protected $hidden = [
