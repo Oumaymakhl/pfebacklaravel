@@ -132,7 +132,8 @@ Route::post('/change-password', [ChangePasswordController::class, 'passwordReset
 
 Route::get('company/details/{id}', [CompanyController::class, 'showCompanyDetails']);
 Route::get('/profile', [AdminController::class, 'profile']);
-
+Route::match(['get', 'post'], '/profile', [adminController::class, 'profile']);
+Route::put('/updateprofil', [adminController::class, 'updateprofile']);
 
 Route::get('/likes', [LikeController::class, 'index']); // Route pour récupérer tous les likes
 Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
