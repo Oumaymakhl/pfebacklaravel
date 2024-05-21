@@ -1,5 +1,4 @@
 <?php
-
 return [
 
     /*
@@ -34,6 +33,13 @@ return [
             'driver' => 'local',
             'root' => storage_path('app'),
             'throw' => false,
+        ],
+
+        'signatures' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/signatures'),
+            'url' => env('APP_URL').'/storage/signatures',
+            'visibility' => 'public',
         ],
 
         'public' => [

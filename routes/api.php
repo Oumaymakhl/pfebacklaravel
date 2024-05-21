@@ -16,6 +16,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\SignatureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -136,3 +137,7 @@ Route::get('/profile', [AdminController::class, 'profile']);
 
 Route::get('/likes', [LikeController::class, 'index']); // Route pour récupérer tous les likes
 Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
+
+Route::post('documents/{documentId}/add-signature-and-download', [DocumentController::class, 'addSignatureAndDownload']);
+Route::post('signatures/upload', [SignatureController::class, 'upload']);
+Route::post('documents/export-with-signature', [DocumentController::class, 'exportDocumentWithSignature']);
