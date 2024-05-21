@@ -32,58 +32,46 @@ class DocumentController extends Controller
     
         return response()->json(['message' => 'Document imported successfully', 'document' => $document], 201);
     }
-    public function exportDocument($documentId)
-{
-    $document = Document::findOrFail($documentId);
+   
+    public function exportDocumentWithSignature(Request $request)
+    {
+        $request->validate([
+            'documentId' => 'required|exists:documents,id',
+            'signature' => 'required|file|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    // Retourner le fichier PDF à télécharger
-    return response()->download(storage_path('app/' . $document->path));
-} public function signAndDownloadDocument($documentId)
-{
-    try {
-        // Récupérer le document à signer à partir de l'identifiant
-        $document = Document::findOrFail($documentId);
+        $document = Document::findOrFail($request->documentId);
+        $signatureFilePath = $request->file('signature')->store('signatures');
 
-        // Vérifier si le fichier PDF existe dans le chemin spécifié
-        if (!Storage::exists($document->path)) {
-            throw new \Exception('Le fichier PDF n\'existe pas dans le chemin spécifié.');
-        }
+        $documentWithSignature = $this->addSignatureToDocument($document->path, $signatureFilePath);
 
-        // Créer une nouvelle instance FPDI
-        $pdf = new Fpdi();
-
-        // Charger le document PDF existant
-        $pageCount = $pdf->setSourceFile(Storage::path($document->path));
-
-        // Importer toutes les pages du document PDF d'origine
-        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
-            $tplId = $pdf->importPage($pageNumber);
-            $pdf->AddPage();
-            $pdf->useTemplate($tplId, 0, 0);
-        }
-
-        // Charger l'image de la signature
-        $signatureImagePath = public_path('sign.png');
-
-        // Ajouter une nouvelle page pour la signature
-        $pdf->AddPage();
-        $pdf->Image($signatureImagePath, 10, 10, 40, 15); // Ajuster les coordonnées et les dimensions si nécessaire
-
-        // Générer le PDF signé temporairement
-        $tempFileName = 'signed_' . $document->name;
-        $tempFilePath = storage_path('app/signed_documents/' . $tempFileName);
-        $pdf->Output($tempFilePath, 'F');
-
-        // Retourner le fichier signé en tant que réponse de téléchargement
-        return response()->download($tempFilePath, $tempFileName)->deleteFileAfterSend();
-
-    } catch (\Exception $e) {
-        // En cas d'erreur, retourner une réponse d'erreur
-        return response()->json(['error' => $e->getMessage()], 500);
+        return response()->streamDownload(function () use ($documentWithSignature) {
+            echo $documentWithSignature;
+        }, 'document_signed.pdf');
     }
-}
 
- // Chemin de destination pour le téléchargement
+    private function addSignatureToDocument($documentPath, $signatureFilePath)
+    {
+        $documentFullPath = storage_path('app/' . $documentPath);
+        $signatureFullPath = storage_path('app/' . $signatureFilePath);
+
+        $pdf = new Fpdi();
+        $pageCount = $pdf->setSourceFile($documentFullPath);
+
+        for ($pageNumber = 1; $pageNumber <= $pageCount; $pageNumber++) {
+            $templateId = $pdf->importPage($pageNumber);
+            $pdf->addPage();
+            $pdf->useTemplate($templateId);
+
+            // Ajouter la signature uniquement sur la dernière page
+            if ($pageNumber == $pageCount) {
+                $pdf->Image($signatureFullPath, 10, 250, 50, 30); // Ajustez les coordonnées et dimensions si nécessaire
+            }
+        }
+
+        return $pdf->Output('S');
+    }
+
 public function showDocuments()
 {
     // Récupérer tous les documents enregistrés dans la base de données
@@ -92,5 +80,11 @@ public function showDocuments()
     // Retourner les documents en tant que réponse JSON
     return response()->json($documents);
 }
+public function exportDocument($documentId)
+{
+    $document = Document::findOrFail($documentId);
 
+    // Retourner le fichier PDF à télécharger
+    return response()->download(storage_path('app/' . $document->path));
+}
 }

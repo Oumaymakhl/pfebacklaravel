@@ -184,8 +184,6 @@ public function signup(Request $request)
     ], 201);
 }
 
-
-
  /**
      * Log the admin out (Invalidate the token).
      *
