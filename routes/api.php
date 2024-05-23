@@ -77,16 +77,9 @@ Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
 
 // Route pour liker une décision
 // Route pour liker une décision
-Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision'])->middleware('auth');
+Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision'])->name('decisions.like');
+Route::post('/decisions/{decision}/dislike', [DecisionController::class, 'dislikeDecision'])->name('decisions.dislike');
 
-// Route pour disliker une décision
-Route::post('/decisions/{decision}/dislike', [DecisionController::class, 'dislikeDecision'])->middleware('auth');
-
-
-Route::post('/decisions2/{decision}/like/{userId}', [DecisionController::class, 'likeDecision2']);
-
-// Route pour disliker une décision
-Route::post('/decisions2/{decision}/dislike/{userId}', [DecisionController::class, 'dislikeDecision2']);
 
 Route::get('/tasks', [TaskController::class, 'index']); // Afficher toutes les tâches
 Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle tâche

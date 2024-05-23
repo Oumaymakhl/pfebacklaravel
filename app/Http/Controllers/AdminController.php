@@ -607,9 +607,7 @@ public function updateprofile(Request $request)
     $user->prenom = $request->input('prenom', $user->prenom);
     $user->login = $request->input('login', $user->login);
     $user->email = $request->input('email', $user->email);
-    // Ajoutez d'autres champs que vous souhaitez mettre à jour
 
-    // Vérifiez s'il y a une nouvelle photo de profil téléchargée
     if ($request->hasFile('profile_photo')) {
         $photo = $request->file('profile_photo');
         $photoPath = $photo->store('public/profile_photos');
