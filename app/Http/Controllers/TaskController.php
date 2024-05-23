@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Validator;
@@ -10,23 +9,19 @@ class TaskController extends Controller
 {
     public function store(Request $request)
     {
-        // Validation des données de la requête
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id', // S'assure que l'ID de l'utilisateur existe dans la table des utilisateurs
+            'user_id' => 'required|exists:users,id',
             'status' => 'required',
-            'estimated_time' => 'required',
-            'name' => 'required',
-            'description' => 'required',
+            'estimated_time' => 'required|integer',
+            'name' => 'required|string',
+            'description' => 'required|string',
             'time_spent' => 'nullable|integer',
-            
         ]);
 
-        // Vérifie s'il y a des erreurs de validation
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        // Création de la tâche avec les données fournies
         $task = Task::create($request->all());
 
         return response()->json(['task' => $task], 201);
@@ -49,17 +44,15 @@ class TaskController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validation des données de la requête
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'status' => 'required',
-            'estimated_time' => 'required',
-            'name' => 'required',
-            'description' => 'required',
+            'estimated_time' => 'required|integer',
+            'name' => 'required|string',
+            'description' => 'required|string',
             'time_spent' => 'nullable|integer',
         ]);
 
-        // Vérifie s'il y a des erreurs de validation
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
@@ -82,41 +75,54 @@ class TaskController extends Controller
         $task->delete();
         return response()->json(['message' => 'Task deleted successfully'], 200);
     }
+
     public function updateStatus(Request $request, $id)
     {
+        // Trouver la tâche par son ID
         $task = Task::findOrFail($id);
+
+        // Mettre à jour le statut de la tâche
         $task->update(['status' => $request->input('status')]);
+
+        // Retourner la tâche mise à jour
         return response()->json($task);
     }
+
     public function calculateTimeSpent($id)
     {
-        // Find the task by ID
         $task = Task::find($id);
-
-        // Check if the task exists
         if (!$task) {
             return response()->json(['message' => 'Task not found'], 404);
         }
 
-        // Calculate the time spent
-        // Get the current time
         $currentTime = now();
-
-        // Get the created_at time of the task
         $createdAtTime = $task->created_at;
-
-        // Calculate the time difference in seconds
         $timeSpentInSeconds = $currentTime->diffInSeconds($createdAtTime);
-
-        // Convert the time spent from seconds to hours or minutes (as you prefer)
-        $timeSpentInHours = $timeSpentInSeconds / 3600; // Convert seconds to hours
-        // You can use other units of time (e.g., minutes) if you prefer
-
-        // Update the task's time_spent with the calculated time spent
-        $task->time_spent = round($timeSpentInHours, 2); // rounding to 2 decimal places for better readability
+        $timeSpentInHours = $timeSpentInSeconds / 3600;
+        $task->time_spent = round($timeSpentInHours, 2);
         $task->save();
 
-        // Return the updated task with the calculated time_spent
         return response()->json(['task' => $task], 200);
+    }
+    public function findTasksByUser(Request $request)
+    {
+        // Valider les données d'entrée pour s'assurer que 'user_id' est présent
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+    
+        // Extraire l'ID utilisateur des données validées
+        $userId = $validatedData['user_id'];
+    
+        // Récupérer les tâches associées à l'utilisateur
+        $tasks = Task::where('user_id', $userId)->get();
+    
+        // Vérifiez si des tâches sont trouvées
+        if ($tasks->isEmpty()) {
+            return response()->json(['message' => 'No tasks found for the specified user.'], 404);
+        }
+    
+        // Retourner les tâches
+        return response()->json(['tasks' => $tasks], 200);
     }
 }
