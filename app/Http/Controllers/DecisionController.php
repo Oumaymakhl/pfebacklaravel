@@ -1,10 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\admin;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Decision;
 use Illuminate\Http\Request;
 use App\Models\Like;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
 class DecisionController extends Controller
 {
@@ -17,26 +20,59 @@ class DecisionController extends Controller
 }
 
     
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-        ]);
+public function store(Request $request)
+{
+    // Validation de la requête
+    $request->validate([
+        'title' => 'required',
+        'description' => 'required',
+    ]);
 
-        $decision = Decision::create($request->all());
-        return response()->json(['message' => 'Decision created successfully', 'decision' => $decision], 201);
+    // Extraction et vérification du token
+    try {
+        $token = JWTAuth::getToken();
+        $payload = JWTAuth::getPayload($token)->toArray();
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Invalid token'], 401);
     }
+
+    // Vérification du type d'utilisateur
+    $type = $payload['type'];
+    $id = $payload['sub'];
+
+    if ($type !== 'admin') {
+        return response()->json(['error' => 'Only admins can create decisions.'], 403);
+    }
+
+    // Récupération de l'utilisateur admin
+    $user = Admin::find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    // Vérification de l'association de l'utilisateur avec une entreprise
+    if (!$user->company_id) {
+        return response()->json(['error' => 'Admin must be associated with a company to create decisions.'], 403);
+    }
+
+    // Création de la décision
+    $decision = Decision::create([
+        'title' => $request->input('title'),
+        'description' => $request->input('description'),
+        'company_id' => $user->company_id,
+    ]);
+
+    return response()->json(['message' => 'Decision created successfully', 'decision' => $decision], 201);
+}
+
 
     public function show($id)
     {
-        $decision = Decision::findOrFail($id);
-       
-        $decision->likes_count = $decision->likes;
-        $decision->dislikes_count = $decision->dislikes;
+        $decision = Decision::withCount('likes')->findOrFail($id);
         return response()->json(['decision' => $decision], 200);
-    
     }
+    
 
     public function update(Request $request, $id)
     {
@@ -61,58 +97,114 @@ class DecisionController extends Controller
 
 
     
+
+
     public function likeDecision($decisionId, Request $request)
     {
-        // Vérifier l'authentification de l'utilisateur
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        // Extraction et vérification du token
+        try {
+            $token = JWTAuth::getToken();
+            $payload = JWTAuth::getPayload($token)->toArray();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid token'], 401);
         }
-        
-        // Récupérer l'ID de l'utilisateur authentifié
-        $userId = Auth::id();
     
-        // Récupérer la décision
+        // Vérification du type d'utilisateur et de son ID
+        $userId = $payload['sub'];
+        $userType = $payload['type'];
+    
+        // Récupération de l'utilisateur depuis la base de données
+        $user = User::find($userId);
+    
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    
+        // Récupération de la décision
         $decision = Decision::findOrFail($decisionId);
     
-        // Ajouter le like associé à l'utilisateur
-        $decision->likes()->create([
-            'user_id' => $userId,
-            'like' => true,
-            'dislike' => false,
-        ]);
+        // Vérification si l'utilisateur est autorisé à liker la décision
+        if ($userType === 'user' && $user->company_id === $decision->company_id) {
+            // Vérifier si l'utilisateur a déjà liké ou disliké cette décision
+            $existingLike = $decision->likes()->where('user_id', $userId)->first();
+            if ($existingLike) {
+                return response()->json(['error' => 'User has already liked or disliked this decision'], 400);
+            }
     
-        // Mettre à jour le compteur de likes
-        $decision->increment('likes_count');
+            // Vérifier si l'utilisateur a déjà disliké cette décision
+            $existingDislike = $decision->likes()->where('user_id', $userId)->where('dislike', true)->first();
+            if ($existingDislike) {
+                return response()->json(['error' => 'User has already disliked this decision'], 400);
+            }
     
-        return response()->json(['message' => 'Decision liked successfully'], 200);
+            // Ajouter le like associé à l'utilisateur
+            $decision->likes()->create([
+                'user_id' => $userId,
+                'like' => true,
+                'dislike' => false,
+            ]);
+    
+            // Incrémenter le compteur de likes dans la table decisions
+            $decision->increment('likes');
+    
+            return response()->json(['message' => 'Decision liked successfully'], 200);
+        } else {
+            return response()->json(['error' => 'User is not allowed to like this decision'], 403);
+        }
     }
     
     public function dislikeDecision($decisionId, Request $request)
     {
-        // Vérifier l'authentification de l'utilisateur
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        // Extraction et vérification du token
+        try {
+            $token = JWTAuth::getToken();
+            $payload = JWTAuth::getPayload($token)->toArray();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid token'], 401);
         }
     
-        // Récupérer l'ID de l'utilisateur authentifié
-        $userId = Auth::id();
+        // Vérification du type d'utilisateur et de son ID
+        $userId = $payload['sub'];
+        $userType = $payload['type'];
     
-        // Récupérer la décision
+        // Récupération de l'utilisateur depuis la base de données
+        $user = User::find($userId);
+    
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    
+        // Récupération de la décision
         $decision = Decision::findOrFail($decisionId);
     
-        // Ajouter le dislike associé à l'utilisateur
-        $decision->likes()->create([
-            'user_id' => $userId,
-            'like' => false,
-            'dislike' => true,
-        ]);
+        // Vérification si l'utilisateur est autorisé à disliker la décision
+        if ($userType === 'user' && $user->company_id === $decision->company_id) {
+            // Vérifier si l'utilisateur a déjà liké ou disliké cette décision
+            $existingLike = $decision->likes()->where('user_id', $userId)->first();
+            if ($existingLike) {
+                return response()->json(['error' => 'User has already liked or disliked this decision'], 400);
+            }
     
-        // Mettre à jour le compteur de dislikes
-        $decision->increment('dislikes_count');
+            // Vérifier si l'utilisateur a déjà liké cette décision
+            $existingLike = $decision->likes()->where('user_id', $userId)->where('like', true)->first();
+            if ($existingLike) {
+                return response()->json(['error' => 'User has already liked this decision'], 400);
+            }
     
-        return response()->json(['message' => 'Decision disliked successfully'], 200);
+            // Ajouter le dislike associé à l'utilisateur
+            $decision->likes()->create([
+                'user_id' => $userId,
+                'like' => false,
+                'dislike' => true,
+            ]);
+    
+            // Incrémenter le compteur de dislikes dans la table decisions
+            $decision->increment('dislikes');
+    
+            return response()->json(['message' => 'Decision disliked successfully'], 200);
+        } else {
+            return response()->json(['error' => 'User is not allowed to dislike this decision'], 403);
+        }
     }
-
     
-}    
-    
+}
