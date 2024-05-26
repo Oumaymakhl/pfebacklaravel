@@ -396,9 +396,9 @@ public function authenticate(Request $request)
 
         if (!$user) {
             $username = explode('@', $request->login)[0]; // Get the username part
-            Log::info("Username without domain: ".$username); // Log the username without domain
+            Log::info("Username without domain: ".$username); 
             $user = User::where('login', $username)->first();
-            Log::info("User found with username: ".json_encode($user)); // Log the user found with username
+            Log::info("User found with username: ".json_encode($user)); 
         }
 
         $type = $user ? 'user' : $type;
