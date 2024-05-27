@@ -136,3 +136,4 @@ Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
 Route::post('documents/{documentId}/add-signature-and-download', [DocumentController::class, 'addSignatureAndDownload']);
 Route::post('signatures/upload', [SignatureController::class, 'upload']);
 Route::post('documents/export-with-signature', [DocumentController::class, 'exportDocumentWithSignature']);
+Route::middleware('auth:api')->get('/admin/company/users', [Controller::class, 'getUsersByAdminCompanyId']);

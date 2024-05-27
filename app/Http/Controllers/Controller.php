@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\UserRegistrationMail;
 use Illuminate\Support\Facades\Session;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\DB; 
 
 class Controller extends BaseController
@@ -118,5 +118,36 @@ class Controller extends BaseController
     return response()->json(['fullName' => $user->nom . ' ' . $user->prenom]);
 }
 
-  
+public function getUsersByAdminCompanyId(Request $request)
+{
+    try {
+        $token = JWTAuth::getToken();
+        $payload = JWTAuth::getPayload($token)->toArray();
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Invalid token'], 401);
+    }
+
+    $type = $payload['type'];
+    $id = $payload['sub'];
+
+    if ($type !== 'admin') {
+        return response()->json(['error' => 'Only admins can access this resource.'], 403);
+    }
+
+    $admin = Admin::find($id);
+
+    if (!$admin) {
+        return response()->json(['message' => 'Admin not found'], 404);
+    }
+
+    $companyId = $admin->company_id;
+
+    if (!$companyId) {
+        return response()->json(['error' => 'Admin must be associated with a company.'], 403);
+    }
+
+    $users = User::where('company_id', $companyId)->get();
+
+    return response()->json(['users' => $users], 200);
+}
 }
