@@ -116,8 +116,10 @@ Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
 Route::post('user/logout', [Controller::class, 'userLogout']);
 Route::post('admin/logout', [AdminController::class, 'adminLogout']);
 Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
-Route::get('/findtasks', [TaskController::class, 'findtasksbyuser']);
+Route::middleware('auth:api')->match(['get'], '/findtasks', [TaskController::class, 'findTasksByUser']);
 
+
+Route::middleware('auth:api')->get('/user/tasks', 'TaskController@getUserTasks');
 
 
 
@@ -136,3 +138,6 @@ Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
 Route::post('documents/{documentId}/add-signature-and-download', [DocumentController::class, 'addSignatureAndDownload']);
 Route::post('signatures/upload', [SignatureController::class, 'upload']);
 Route::post('documents/export-with-signature', [DocumentController::class, 'exportDocumentWithSignature']);
+
+Route::middleware('auth:api')->get('admin/company/users', [TaskController::class, 'getUsersByAdminCompanyId']);
+

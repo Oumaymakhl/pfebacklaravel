@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Task;
-
+use App\Models\User;
+use App\Models\Admin;
+use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 class TaskController extends Controller
 {
     public function store(Request $request)
@@ -106,23 +109,79 @@ class TaskController extends Controller
     }
     public function findTasksByUser(Request $request)
     {
-        // Valider les données d'entrée pour s'assurer que 'user_id' est présent
         $validatedData = $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
     
-        // Extraire l'ID utilisateur des données validées
         $userId = $validatedData['user_id'];
     
-        // Récupérer les tâches associées à l'utilisateur
         $tasks = Task::where('user_id', $userId)->get();
     
-        // Vérifiez si des tâches sont trouvées
         if ($tasks->isEmpty()) {
-            return response()->json(['message' => 'No tasks found for the specified user.'], 404);
+            return response()->json(['message' => 'Aucune tâche trouvée pour l\'utilisateur spécifié.'], 404);
         }
     
-        // Retourner les tâches
-        return response()->json(['tasks' => $tasks], 200);
+        return response()->json(['userId' => $userId, 'tasks' => $tasks], 200);
     }
-}
+    public function getUsersByAdminCompanyId(Request $request)
+    {
+        // Extract and validate the token
+        try {
+            $token = JWTAuth::getToken();
+            $payload = JWTAuth::getPayload($token)->toArray();
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid token'], 401);
+        }
+
+        // Check if the user is an admin
+        $type = $payload['type'];
+        $id = $payload['sub'];
+
+        if ($type !== 'admin') {
+            return response()->json(['error' => 'Only admins can access this resource.'], 403);
+        }
+
+        // Retrieve the authenticated admin
+        $admin = Admin::find($id);
+
+        if (!$admin) {
+            return response()->json(['message' => 'Admin not found'], 404);
+        }
+
+        // Check if the admin is associated with a company
+        if (!$admin->company_id) {
+            return response()->json(['error' => 'Admin must be associated with a company.'], 403);
+        }
+
+        // Retrieve users from the same company
+        $users = User::where('company_id', $admin->company_id)->get();
+
+        if ($users->isEmpty()) {
+            return response()->json(['message' => 'No users found for this company'], 404);
+        }
+
+        return response()->json(['users' => $users], 200);
+    }
+    
+    public function getUserTasks(Request $request)
+    {
+        try {
+            // Extraction du token JWT de la requête
+            $token = JWTAuth::parseToken();
+            
+            // Récupération de l'utilisateur à partir du token JWT
+            $user = $token->authenticate();
+            
+            // Récupérer les tâches associées à l'utilisateur
+            $tasks = Task::where('user_id', $user->id)->get();
+            
+            if ($tasks->isEmpty()) {
+                return response()->json(['message' => 'No tasks found for the specified user.'], 404);
+            }
+            
+            // Retourner les tâches
+            return response()->json(['tasks' => $tasks], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    }}
