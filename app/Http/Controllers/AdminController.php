@@ -165,7 +165,7 @@ public function signup(Request $request)
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
         'login' => $data['login'],
-        'password' => $data['password'],
+        'password' => bcrypt($data['password']),
         'email' => $data['email'],
         'company_id' => $company->id,
     ]);
@@ -174,8 +174,7 @@ public function signup(Request $request)
     Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
 
     // Crypter le mot de passe après l'envoi de l'e-mail
-    $admin->password = bcrypt($data['password']);
-    $admin->save();
+
 
     return response()->json([
         'message' => 'Signup successful',
@@ -425,8 +424,8 @@ public function authenticate(Request $request)
     }
 
     if ($user && Hash::check($request->password, $user->password)) {
-        $token = JWTAuth::claims(['type' => $type])->fromUser($user);
-        
+       
+        $token = JWTAuth::claims(['type' => $type,'group'=>$user->company_id])->fromUser($user);
         return response()->json([
             'success' => true,
             'user' => $user,

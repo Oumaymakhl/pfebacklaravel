@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+       
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('sender_id');
-            $table->unsignedBigInteger('receiver_id');
+            $table->string('name');
+            $table->string('photo_url')->nullable();
+            $table->string('email');
             $table->text('message');
+            $table->unsignedBigInteger('receiver_id');
             $table->timestamps();
         });
     }

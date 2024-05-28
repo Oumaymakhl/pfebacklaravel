@@ -17,6 +17,7 @@ use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,8 @@ use App\Http\Controllers\SignatureController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+Route::get('/chat/group', [ChatController::class, 'getMessages']);
 Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
