@@ -17,8 +17,7 @@ return new class extends Migration
             $table->foreign('id_admin')->references('id')->on('admins')->onDelete('cascade'); // Définition de la clé étrangère
             $table->string('titre');
             $table->text('description')->nullable();
-            $table->dateTime('date');
-            $table->boolean('statut')->default(false);
+            $table->string('date');
             $table->timestamps();
         
         });

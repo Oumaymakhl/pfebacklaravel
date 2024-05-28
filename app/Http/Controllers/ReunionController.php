@@ -8,26 +8,42 @@ use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InvitationMail;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
+use Illuminate\Support\Facades\Auth;
 class ReunionController extends Controller
 {
-    public function create_reunion(Request $request)
+
+    public function create(Request $request)
     {
-        $request->validate([
-            'titre' => 'required',
-            'description' => 'nullable',
+        $token = JWTAuth::getToken();
+        $payload = JWTAuth::getPayload($token)->toArray();
+        $type = $payload['type'];
+        $id = $payload['sub'];
+        // Validation des données
+      $request->validate([
+            'titre' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'date' => 'required',
-            'id_admin' => 'required',
-            'statut' =>'required'
+            'participants.*' => 'required', // Assurez-vous que les ID des utilisateurs sont des entiers
         ]);
-
-        $reunions = Reunion::create($request->all());
-
-        return response()->json([
-            'reunions' => $reunions,
-            'message' => 'Reunion created successfully.',
-        ], 201);
+      // return response()->json($request);
+        // Création de la réunion
+        $reunion = Reunion::create([
+            'titre' => $request->titre,
+            'description' => $request->description,
+            'date' => $request->date,
+            'id_admin' => $id, // Assigner l'id de l'administrateur connecté à id_admin
+        ]);
+    
+        // Ajouter les utilisateurs invités
+      $users = $request->input('participants');
+        $reunion->users()->attach($users);
+    
+        // Retourner une réponse
+        return response()->json(['message' => 'Réunion créée avec succès', 'reunion' => $reunion], 200);
     }
-
+    
     public function index()
     {
         $reunions = Reunion::all();

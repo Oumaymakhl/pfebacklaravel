@@ -59,8 +59,9 @@ class User extends Authenticatable implements JWTSubject
     }   
     public function reunions()
     {
-        return $this->belongsToMany(Reunion::class, 'presence')->withPivot('status');
+        return $this->belongsToMany(Reunion::class, 'presence')->withPivot('status', 'raison');
     }
+    
     public function company()
     {
         return $this->belongsTo(Company::class);

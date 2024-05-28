@@ -50,7 +50,7 @@ Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
 Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
-Route::post('/reunions', [ReunionController::class, 'create_reunion']); // Create
+Route::post('/reunion', [ReunionController::class, 'create']); // Create
 Route::get('/reunions', [ReunionController::class, 'index']); // Read
 Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
 Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
@@ -116,8 +116,10 @@ Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
 Route::post('user/logout', [Controller::class, 'userLogout']);
 Route::post('admin/logout', [AdminController::class, 'adminLogout']);
 Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
-Route::get('/findtasks', [TaskController::class, 'findtasksbyuser']);
+Route::middleware('auth:api')->match(['get'], '/findtasks', [TaskController::class, 'findTasksByUser']);
 
+
+Route::middleware('auth:api')->get('/user/tasks', 'TaskController@getUserTasks');
 
 
 
@@ -136,4 +138,6 @@ Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
 Route::post('documents/{documentId}/add-signature-and-download', [DocumentController::class, 'addSignatureAndDownload']);
 Route::post('signatures/upload', [SignatureController::class, 'upload']);
 Route::post('documents/export-with-signature', [DocumentController::class, 'exportDocumentWithSignature']);
-Route::middleware('auth:api')->get('/admin/company/users', [Controller::class, 'getUsersByAdminCompanyId']);
+
+Route::middleware('auth:api')->get('admin/company/users', [TaskController::class, 'getUsersByAdminCompanyId']);
+
