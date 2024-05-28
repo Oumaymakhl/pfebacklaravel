@@ -130,7 +130,7 @@ Route::get('/profile', [AdminController::class, 'profile']);
 Route::match(['get', 'post'], '/profile', [adminController::class, 'profile']);
 Route::put('/updateprofil', [adminController::class, 'updateprofile']);
 
-Route::get('/likes', [LikeController::class, 'index']); // Route pour récupérer tous les likes
+Route::get('/likes', [LikeController::class, 'index']); 
 Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
 
 Route::post('documents/{documentId}/add-signature-and-download', [DocumentController::class, 'addSignatureAndDownload']);

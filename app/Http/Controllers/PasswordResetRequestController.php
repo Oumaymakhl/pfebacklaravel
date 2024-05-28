@@ -21,25 +21,21 @@ class PasswordResetRequestController extends Controller
         $user = null;
         $type = null;
     
-        // Recherche dans la table User
         if (!$user) {
             $user = User::where('email', $email)->first();
             $type = $user ? 'user' : $type;
         }
     
-        // Recherche dans la table Admin
         if (!$user) {
             $user = Admin::where('email', $email)->first();
             $type = $user ? 'admin' : $type;
         }
     
-        // Recherche dans la table Sadmin
         if (!$user) {
             $user = Sadmin::where('email', $email)->first();
             $type = $user ? 'superadmin' : $type;
         }
     
-        // Si l'utilisateur est trouvé, envoyer l'e-mail de réinitialisation de mot de passe
         if ($user) {
             $this->sendMail($request->email);
             return response()->json([
@@ -47,7 +43,6 @@ class PasswordResetRequestController extends Controller
             ], Response::HTTP_OK);
         }
     
-        // Si l'e-mail n'est pas trouvé dans aucune des tables
         return response()->json([
             'message' => 'Email does not exist.'
         ], Response::HTTP_NOT_FOUND);
@@ -59,9 +54,6 @@ class PasswordResetRequestController extends Controller
         Mail::to($email)->send(new SendMail($token));
     }
     
-        public function validEmail($email) {
-           return !!User::where('email', $email)->first();
-        }
         public function generateToken($email){
             $isOtherToken = DB::table('password_resets')->where('email', $email)->first();
             if($isOtherToken) {
@@ -79,5 +71,6 @@ class PasswordResetRequestController extends Controller
                 'created_at' => Carbon::now()            
             ]);
         }
-    }    
+        
+    }        
 
