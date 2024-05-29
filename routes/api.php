@@ -16,6 +16,8 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\StatisticController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +33,8 @@ use App\Http\Controllers\LikeController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+Route::get('/chat/group', [ChatController::class, 'getMessages']);
 Route::post('/sadmin/signup', [SadminController::class, 'signup']);
 Route::post('/sadmin/login', [SadminController::class, 'login']);
 Route::post('/admin/signup', [AdminController::class, 'signup']);
@@ -49,7 +53,7 @@ Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
 Route::delete('/user/{id}', [Controller::class, 'destroy']); // Supprimer un utilisateur
-Route::post('/reunions', [ReunionController::class, 'create_reunion']); // Create
+Route::post('/reunion', [ReunionController::class, 'create']); // Create
 Route::get('/reunions', [ReunionController::class, 'index']); // Read
 Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
 Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
@@ -81,13 +85,12 @@ Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecis
 Route::post('/decisions/{decision}/dislike', [DecisionController::class, 'dislikeDecision'])->name('decisions.dislike');
 
 
-Route::get('/tasks', [TaskController::class, 'index']); // Afficher toutes les tâches
-Route::post('/tasks', [TaskController::class, 'store']); // Créer une nouvelle tâche
-Route::get('/tasks/{id}', [TaskController::class, 'show']); // Afficher une tâche spécifique
-Route::put('/tasks/{id}', [TaskController::class, 'update']); // Mettre à jour une tâche
-Route::delete('/tasks/{id}', [TaskController::class, 'destroy']); // Supprimer une tâche
-Route::put('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
-
+Route::get('/tasks', [TaskController::class, 'index']);
+Route::post('/tasks', [TaskController::class, 'store']);
+Route::get('/tasks/{id}', [TaskController::class, 'show']);
+Route::put('/tasks/{id}', [TaskController::class, 'update']);
+Route::delete('/tasks/{id}', [TaskController::class, 'destroy']);
+Route::patch('/tasks/{id}/status', [TaskController::class, 'updateStatus']);
 
 Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
@@ -116,7 +119,11 @@ Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
 Route::post('user/logout', [Controller::class, 'userLogout']);
 Route::post('admin/logout', [AdminController::class, 'adminLogout']);
 Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
-Route::patch('/tasks/{id}', [TaskController::class, 'updateStatus']);
+Route::middleware('auth:api')->match(['get'], '/findtasks', [TaskController::class, 'findTasksByUser']);
+
+
+Route::middleware('auth:api')->get('/user/tasks', 'TaskController@getUserTasks');
+
 
 
 
@@ -130,3 +137,10 @@ Route::put('/updateprofil', [adminController::class, 'updateprofile']);
 
 Route::get('/likes', [LikeController::class, 'index']); // Route pour récupérer tous les likes
 Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);
+
+Route::post('documents/{documentId}/add-signature-and-download', [DocumentController::class, 'addSignatureAndDownload']);
+Route::post('signatures/upload', [SignatureController::class, 'upload']);
+Route::post('documents/export-with-signature', [DocumentController::class, 'exportDocumentWithSignature']);
+
+Route::middleware('auth:api')->get('admin/company/users', [TaskController::class, 'getUsersByAdminCompanyId']);
+

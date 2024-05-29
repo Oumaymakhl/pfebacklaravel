@@ -165,7 +165,7 @@ public function signup(Request $request)
         'nom' => $data['nom'],
         'prenom' => $data['prenom'],
         'login' => $data['login'],
-        'password' => $data['password'],
+        'password' => bcrypt($data['password']),
         'email' => $data['email'],
         'company_id' => $company->id,
     ]);
@@ -174,8 +174,7 @@ public function signup(Request $request)
     Mail::to($admin->email)->send(new AdminRegistrationMail($admin, $data['password']));
 
     // Crypter le mot de passe après l'envoi de l'e-mail
-    $admin->password = bcrypt($data['password']);
-    $admin->save();
+
 
     return response()->json([
         'message' => 'Signup successful',
@@ -183,8 +182,6 @@ public function signup(Request $request)
         'company' => $company,
     ], 201);
 }
-
-
 
  /**
      * Log the admin out (Invalidate the token).
@@ -398,9 +395,9 @@ public function authenticate(Request $request)
 
         if (!$user) {
             $username = explode('@', $request->login)[0]; // Get the username part
-            Log::info("Username without domain: ".$username); // Log the username without domain
+            Log::info("Username without domain: ".$username); 
             $user = User::where('login', $username)->first();
-            Log::info("User found with username: ".json_encode($user)); // Log the user found with username
+            Log::info("User found with username: ".json_encode($user)); 
         }
 
         $type = $user ? 'user' : $type;
@@ -427,8 +424,8 @@ public function authenticate(Request $request)
     }
 
     if ($user && Hash::check($request->password, $user->password)) {
-        $token = JWTAuth::claims(['type' => $type])->fromUser($user);
-        
+       
+        $token = JWTAuth::claims(['type' => $type,'group'=>$user->company_id])->fromUser($user);
         return response()->json([
             'success' => true,
             'user' => $user,
