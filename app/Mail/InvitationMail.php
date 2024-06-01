@@ -11,10 +11,12 @@ class InvitationMail extends Mailable
     use Queueable, SerializesModels;
 
     protected $reunion;
+    protected $userId; // Ajoutez cette variable pour passer l'ID de l'utilisateur
 
-    public function __construct($reunion)
+    public function __construct($reunion, $userId) // Modifiez le constructeur pour accepter $userId
     {
         $this->reunion = $reunion;
+        $this->userId = $userId; // Initialisez la variable $userId
     }
 
     public function build()
@@ -22,6 +24,7 @@ class InvitationMail extends Mailable
         return $this->view('emails.invitation')
                     ->with([
                         'reunion' => $this->reunion,
+                        'userId' => $this->userId, // Passez $userId à la vue
                     ])
                     ->subject('Invitation à la réunion');
     }
