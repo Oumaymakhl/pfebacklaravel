@@ -37,11 +37,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/chat/send', [ChatController::class, 'sendMessage']);
 Route::get('/chat/group', [ChatController::class, 'getMessages']);
 Route::post('/sadmin/signup', [SadminController::class, 'signup']);
-Route::post('/sadmin/login', [SadminController::class, 'login']);
-Route::post('/admin/signup', [AdminController::class, 'signup']);
-Route::post('/admin/login', [AdminController::class, 'authenticate']);
+Route::post('/admin/signup', [AdminController::class, 'ajoutadmin']);
+Route::post('/admin/login', [LoginController::class, 'authenticate']);
 Route::post('/forget', [Controller::class, 'forgetpassword']);
-Route::post('/user/login', [Controller::class, 'login']);
 Route::get('/companies/index', [CompanyController::class, 'index']); 
 Route::get('/companies/show/{id}', [CompanyController::class, 'show']); 
 Route::put('/companies/update/{id}', [CompanyController::class, 'update']); 
@@ -49,7 +47,7 @@ Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
 Route::get('/finds/{id}', [ReunionController::class, 'getEtat']);
 Route::post('/finds', [ReunionController::class, 'setEtat']);
 
-Route::post('/user/signup', [Controller::class, 'signup']); // Changed this line
+Route::post('/user/signup', [Controller::class, 'ajoutparticipant']); // Changed this line
 Route::get('/user', [Controller::class, 'index']); // Liste des utilisateurs
 Route::get('/user/{id}', [Controller::class, 'show']); // Afficher un utilisateur spécifique
 Route::put('/user/{id}', [Controller::class, 'update']); // Mettre à jour les informations d'un utilisateur
@@ -77,18 +75,9 @@ Route::post('/decisions', [DecisionController::class, 'store']);
 Route::get('/decisions/{id}', [DecisionController::class, 'show']);
 Route::put('/decisions/{id}', [DecisionController::class, 'update']);
 Route::delete('/decisions/{id}', [DecisionController::class, 'destroy']);
-// Route pour récupérer les likes d'une décision spécifique
-// routes/api.php
 
-
-//Route::get('decisions/{decision}/likes', [LikeController::class, 'getLikesForDecision']);
-//Route::get('decisions/{decision}/dislikes', [LikeController::class, 'getDislikesForDecision']);
-
-
-// Route pour liker une décision
-// Route pour liker une décision
-Route::post('/decisions/{decision}/like', [DecisionController::class, 'likeDecision'])->name('decisions.like');
-Route::post('/decisions/{decision}/dislike', [DecisionController::class, 'dislikeDecision'])->name('decisions.dislike');
+Route::post('/decisions/{decision}/like', [LikeController::class, 'likeDecision'])->name('decisions.like');
+Route::post('/decisions/{decision}/dislike', [LikeController::class, 'dislikeDecision'])->name('decisions.dislike');
 
 
 Route::get('/tasks', [TaskController::class, 'index']);
@@ -137,9 +126,8 @@ Route::post('/reset-password-request', [PasswordResetRequestController::class, '
 Route::post('/change-password', [ChangePasswordController::class, 'passwordResetProcess']);
 
 Route::get('company/details/{id}', [CompanyController::class, 'showCompanyDetails']);
-Route::get('/profile', [AdminController::class, 'profile']);
-Route::match(['get', 'post'], '/profile', [adminController::class, 'profile']);
-Route::put('/updateprofil', [adminController::class, 'updateprofile']);
+Route::match(['get', 'post'], '/profile', [LoginController::class, 'profile']);
+Route::put('/updateprofil', [LoginController::class, 'updateprofile']);
 
 Route::get('/likes', [LikeController::class, 'index']); // Route pour récupérer tous les likes
 Route::get('/users/{id}/name', [Controller::class, 'getUserNameById']);

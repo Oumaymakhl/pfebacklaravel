@@ -84,7 +84,6 @@ public function exportDocument($documentId)
 {
     $document = Document::findOrFail($documentId);
 
-    // Retourner le fichier PDF à télécharger
     return response()->download(storage_path('app/' . $document->path));
 }
 }
