@@ -18,6 +18,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\MeetingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -144,3 +145,13 @@ Route::post('documents/export-with-signature', [DocumentController::class, 'expo
 
 Route::middleware('auth:api')->get('admin/company/users', [TaskController::class, 'getUsersByAdminCompanyId']);
 
+Route::post('/meetings', [MeetingController::class, 'create'])->name('meetings.create');
+
+// Récupérer toutes les réunions
+Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+
+// Mettre à jour une réunion
+Route::put('/meetings/{id}', [MeetingController::class, 'update'])->name('meetings.update');
+
+// Supprimer une réunion
+Route::delete('/meetings/{id}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
