@@ -60,7 +60,12 @@ Route::put('/reunions/{id}', [ReunionController::class, 'update']); // Update
 Route::delete('/reunions/{id}', [ReunionController::class, 'destroy']); // Delete
 Route::get('/companies/{companyId}/reunions/{reunionId}/invited-users', [ReunionController::class, 'getInvitedUsers']);
 Route::post('/reunions/invite-users', [ReunionController::class, 'inviteUsers'])->name('reunions.inviteUsers');
+Route::get('/reunion/{id}', [ReunionController::class, 'show']);
+Route::post('reunion/{reunionId}/confirm-participation', [ReunionController::class, 'confirmParticipation']);
+Route::post('/set-etat', [ReunionController::class, 'setEtat']);
+Route::get('reunions/{id}/participants-status', [ReunionController::class, 'getEtat']);
 
+Route::post('/reunion/{id}/confirm', [ReunionController::class, 'confirmParticipation']);
 Route::post('import-document', [DocumentController::class, 'importDocument']);
 Route::get('export-document/{documentId}', [DocumentController::class, 'exportDocument']);
 Route::get('download-signed-document/{documentId}', [DocumentController::class, 'downloadSignedDocument']);
