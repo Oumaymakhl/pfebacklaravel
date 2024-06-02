@@ -22,7 +22,7 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function signup(Request $request)
+    public function ajoutparticipant(Request $request)
     {
         $data = $request->validate([
             'nom' => 'required',
@@ -84,6 +84,11 @@ class Controller extends BaseController
             'email' => 'required',
             'company_id' => 'required|exists:companies,id',
         ]);
+       
+        if (Admin::where('email', $data['email'])->orWhere('login', $data['login'])->exists() ||
+        Sadmin::where('email', $data['email'])->orWhere('login', $data['login'])->exists()) {
+        return response()->json(['message' => 'Email or login already exists in other roles'], 422);
+    }
 
         $user->update($data);
 
@@ -99,22 +104,15 @@ class Controller extends BaseController
         $user->delete();
         return response()->json(['message' => 'User deleted successfully'], 200);
     }
-    public function userLogout(Request $request)
-    {
-        $request->session()->invalidate();
-
-        return response()->json(['message' => 'User logged out successfully'], 200);
-    }
+   
     public function getUserNameById($id)
 {
-    // Récupérer l'utilisateur par son ID
     $user = User::find($id);
 
     if (!$user) {
         return response()->json(['error' => 'Utilisateur non trouvé'], 404);
     }
 
-    // Retourner le nom complet en une seule ligne
     return response()->json(['fullName' => $user->nom . ' ' . $user->prenom]);
 }
 

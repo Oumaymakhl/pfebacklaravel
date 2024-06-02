@@ -32,14 +32,12 @@ class ReunionController extends Controller
             'participants.*' => 'required', // Assurez-vous que les ID des utilisateurs sont des entiers
         ]);
         
-        // Formatage de la date
         $date = Carbon::parse($request->date);
         
-        // Création de la réunion
         $reunion = Reunion::create([
             'titre' => $request->titre,
             'description' => $request->description,
-            'date' => $date, // Utilisation de la date formatée
+            'date' => $date, 
             'id_admin' => $id, // Assigner l'id de l'administrateur connecté à id_admin
         ]);
         
@@ -113,50 +111,6 @@ class ReunionController extends Controller
         return response()->json(['users' => $users], 200);
     }
     
-    public function recordPresence(Request $request)
-    {
-        $request->validate([
-            'reunion_id' => 'required|exists:reunions,id',
-            'status' => 'required|in:disponible,non_disponible',
-            'raison' => 'nullable|string',
-        ]);
-    
-        // Récupérer les IDs de l'utilisateur et de la réunion depuis les paramètres de l'URL
-        $userId = $request->query('user_id'); // Récupérer l'ID de l'utilisateur depuis les paramètres de l'URL
-        $reunionId = $request->query('reunion_id'); // Récupérer l'ID de la réunion depuis les paramètres de l'URL
-    
-        // Log des données reçues pour débogage
-        Log::info('Données reçues pour enregistrer la présence:', $request->all());
-    
-        DB::table('presence')->updateOrInsert(
-            [
-                'user_id' => $userId, // Utiliser l'ID de l'utilisateur récupéré depuis les paramètres de l'URL
-                'reunion_id' => $reunionId, // Utiliser l'ID de la réunion récupéré depuis les paramètres de l'URL
-            ],
-            [
-                'status' => $request->status,
-                'raison' => $request->raison
-            ]
-        );
-    
-        return response()->json(['message' => 'Présence enregistrée avec succès'], 200);
-    }
-      
-    public function setEtat(Request $request)
-    {
-        // Valider les données de la requête
-        $request->validate([
-            'user_id' => 'required',
-            'status' => 'required|in:disponible,non_disponible',
-            'raison' => 'required|string',
-            'reunion_id' => 'required|exists:reunions,id'
-        ]);
-    
-        // Enregistrer la présence en appelant la méthode recordPresence
-        return $this->recordPresence($request);
-    }
-
-    
    
 public function show($id)
 {
@@ -170,17 +124,14 @@ public function show($id)
 }
 
 public function confirmParticipation(Request $request, $reunionId) {
-    // Valider les données de la demande
     $request->validate([
         'userId' => 'required',
         'status' => 'required|boolean', // Assurez-vous que status est un booléen
         'raison' => 'nullable|string',
     ]);
 
-    // Convertir la valeur de status en un booléen
     $status = filter_var($request->input('status'), FILTER_VALIDATE_BOOLEAN);
 
-    // Enregistrer les données dans la table presence
     Presence::create([
         'reunion_id' => $reunionId,
         'user_id' => $request->input('userId'),

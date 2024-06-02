@@ -8,11 +8,7 @@ use App\Models\admin;
 
 class CompanyController extends Controller
 {
-   /* public function index()
-    {
-        $companies = Company::with('admins')->get();
-        return response()->json($companies);
-    }*/
+   
     public function index()
     {
         $companies = Company::all();
@@ -23,49 +19,14 @@ class CompanyController extends Controller
     
  
   
-  /*public function show($id)
-    {
-        $company = Company::with('admins')->findOrFail($id);
-        return response()->json($company);
-    }*/
+  
     public function show($id)
 {
     $company = Company::find($id);
     return response()->json(['company' => $company ], 200);
 }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-   
-    
- /* public function update(Request $request, $id)
-  {
-    $companies = Company::find($id);
-
-    if (!$companies) {
-        return response()->json(['message' => 'company not found.'], 404);
-    }
-
-    $data =$request->validate([
-          'nom' => 'required',
-          'subdomaine' => 'required',
-          'logo' => 'nullable',
-          'adresse' => 'required'
-        
-      ]);
-
-     
-
-      $companies->update( $data);
-
-      return response()->json(['message' => 'company updated successfully', 'company' => $companies], 200);
-    
-  }*/public function update(Request $request, $id)
+   public function update(Request $request, $id)
 {
     $company = Company::find($id);
 
