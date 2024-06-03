@@ -58,7 +58,7 @@
             <p>{{ $meeting['description'] }}</p>
             <p><strong>Date :</strong> {{ $meeting['date'] }}</p>
             <p>To join the meeting, please click on the link below:</p>
-            <a href="http://localhost:4200/#/meeting2?meetingId={{ $meeting->id }}"></a>
+            <a href="http://localhost:4200/#/meeting2?meetingId={{ $meeting->id }}" class="button">Join Meeting</a>
 
         </div>
     </div>
