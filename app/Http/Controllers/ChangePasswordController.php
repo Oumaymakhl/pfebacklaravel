@@ -10,13 +10,19 @@ use App\Models\Sadmin;
     class ChangePasswordController extends Controller {
         public function passwordResetProcess(UpdatePasswordRequest $request)
         {
-            $userType = $this->getUserType($request->email);
-    
-            if (!$userType) {
+            // Vérifier si le token existe dans la base de données
+            $passwordReset = DB::table('password_resets')->where([
+                'email' => $request->email,
+                'token' => $request->passwordToken
+            ])->first();
+        
+            // Vérifier si le token existe
+            if (!$passwordReset) {
                 return $this->tokenNotFoundError();
             }
-    
-            switch ($userType) {
+        
+            // Réinitialiser le mot de passe en fonction du type d'utilisateur
+            switch ($this->getUserType($request->email)) {
                 case 'user':
                     $this->resetUserPassword($request);
                     break;
@@ -26,14 +32,14 @@ use App\Models\Sadmin;
                 case 'sadmin':
                     $this->resetSadminPassword($request);
                     break;
+                default:
+                    return $this->tokenNotFoundError();
             }
-    
+        
             return response()->json([
                 'data' => 'Password has been updated.'
             ], Response::HTTP_CREATED);
-        }
-    
-        private function updatePasswordRow($request)
+        }        private function updatePasswordRow($request)
         {
             return DB::table('password_resets')->where([
                 'email' => $request->email,
@@ -71,7 +77,6 @@ use App\Models\Sadmin;
             $this->updatePasswordRow($request)->delete();
         }
     
-        // Réinitialiser le mot de passe pour l'administrateur
         private function resetAdminPassword($request)
         {
             $admin = Admin::where('email', $request->email)->first();
