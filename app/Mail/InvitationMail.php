@@ -24,8 +24,8 @@ class InvitationMail extends Mailable
         return $this->view('emails.invitation')
                     ->with([
                         'reunion' => $this->reunion,
-                        'userId' => $this->userId, // Passez $userId à la vue
+                        'userId' => $this->userId, 
                     ])
-                    ->subject('Invitation à la réunion');
+                    ->subject('Invitation to the meeting');
     }
 }
