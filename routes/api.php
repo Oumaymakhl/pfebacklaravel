@@ -148,3 +148,9 @@ Route::put('/meetings/{id}', [MeetingController::class, 'update'])->name('meetin
 
 // Supprimer une réunion
 Route::delete('/meetings/{id}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
+Route::get('/statistics/admin-count', [StatisticController::class, 'getAdminCount']);
+Route::get('/statistics/document-count', [StatisticController::class, 'getDocumentCount']);
+Route::get('/statistics/decision-count', [StatisticController::class, 'getDecisionCount']);
+Route::get('/statistics/like-dislike-comparison', [StatisticController::class, 'getLikeDislikeComparison']);
+Route::get('/statistics/decision-countAdmin', [StatisticController::class, 'getDecisionCountAdmin']);
+Route::get('/statistics/task-countAdmin', [StatisticController::class, 'getTaskCountAdmin']);
