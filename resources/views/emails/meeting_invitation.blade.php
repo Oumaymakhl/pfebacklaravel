@@ -20,7 +20,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background-color: #4CAF50;
+            background-color: #004085; /* Dark blue */
             color: white;
             padding: 10px 0;
             text-align: center;
@@ -41,7 +41,7 @@
             padding: 10px 20px;
             margin: 20px 0;
             color: white;
-            background-color: #4CAF50;
+            background-color: #004085; 
             text-decoration: none;
             border-radius: 5px;
         }
@@ -53,7 +53,7 @@
         <h1>Online Meeting Invitation</h1>
         </div>
         <div class="content">
-            <p>Bonjour,</p>
+            <p>Good morning,</p>
             <p>You are invited to participate in the meeting"{{ $meeting['titre'] }}".</p>
             <p>{{ $meeting['description'] }}</p>
             <p><strong>Date :</strong> {{ $meeting['date'] }}</p>

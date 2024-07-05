@@ -105,7 +105,7 @@ class ReunionController extends Controller
         $users = DB::table('presence')
                     ->where('reunion_id', $id)
                     ->join('users', 'presence.user_id', '=', 'users.id')
-                    ->select('users.*', 'presence.status', 'presence.raison')
+                    ->select('users.*', 'presence.status', 'presence.raison') // Sélectionnez également la colonne "raison"
                     ->get();
     
         return response()->json(['users' => $users], 200);

@@ -10,13 +10,11 @@ use App\Models\Sadmin;
     class ChangePasswordController extends Controller {
         public function passwordResetProcess(UpdatePasswordRequest $request)
         {
-            // Vérifier si le token existe dans la base de données
             $passwordReset = DB::table('password_resets')->where([
                 'email' => $request->email,
                 'token' => $request->passwordToken
             ])->first();
         
-            // Vérifier si le token existe
             if (!$passwordReset) {
                 return $this->tokenNotFoundError();
             }

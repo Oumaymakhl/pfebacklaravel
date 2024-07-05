@@ -148,4 +148,5 @@ public function getUsersByAdminCompanyId(Request $request)
 
     return response()->json(['users' => $users], 200);
 }
+
 }

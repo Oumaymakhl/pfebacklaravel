@@ -107,22 +107,26 @@ class TaskController extends Controller
 
         return response()->json(['task' => $task], 200);
     }
-    public function findTasksByUser(Request $request)
+    public function findTasksByUserId($userId)
     {
-        $validatedData = $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-    
-        $userId = $validatedData['user_id'];
-    
-        $tasks = Task::where('user_id', $userId)->get();
-    
-        if ($tasks->isEmpty()) {
-            return response()->json(['message' => 'Aucune tâche trouvée pour l\'utilisateur spécifié.'], 404);
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
         }
-    
-        return response()->json(['userId' => $userId, 'tasks' => $tasks], 200);
+
+        // Récupérer les tâches de l'utilisateur
+        $tasks = $user->tasks()->orderBy('id', 'DESC')->get();
+
+        // Vérifier s'il y a des tâches
+        if ($tasks->isEmpty()) {
+            return response()->json(['message' => 'No tasks found for the specified user.'], 404);
+        }
+
+        return response()->json(['tasks' => $tasks], 200);
     }
+
+
+
     public function getUsersByAdminCompanyId(Request $request)
     {
         // Extract and validate the token
@@ -166,20 +170,14 @@ class TaskController extends Controller
     public function getUserTasks(Request $request)
     {
         try {
-            // Extraction du token JWT de la requête
             $token = JWTAuth::parseToken();
-            
-            // Récupération de l'utilisateur à partir du token JWT
             $user = $token->authenticate();
-            
-            // Récupérer les tâches associées à l'utilisateur
             $tasks = Task::where('user_id', $user->id)->get();
-            
+
             if ($tasks->isEmpty()) {
                 return response()->json(['message' => 'No tasks found for the specified user.'], 404);
             }
-            
-            // Retourner les tâches
+
             return response()->json(['tasks' => $tasks], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unauthorized'], 401);

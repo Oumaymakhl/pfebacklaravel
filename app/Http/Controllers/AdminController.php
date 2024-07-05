@@ -45,24 +45,24 @@ public function ajoutadmin(Request $request)
     if ($validator->fails()) {
         return response()->json($validator->errors()->toJson(), 400);
     }
-
     $data = $validator->validated();
 
     $existingAdminOrCompany = Admin::where('email', $data['email'])
+        ->orWhere('login', $data['login']) // Vérifie si le login existe également
         ->orWhereHas('company', function($query) use ($data) {
             $query->where('nom', $data['company']['nom']);
         })->first();
-
+    
     if ($existingAdminOrCompany) {
-        $message = $existingAdminOrCompany->email === $data['email'] ? 'Email already exists' : 'Company already exists';
+        $message = ($existingAdminOrCompany->email === $data['email'] || $existingAdminOrCompany->login === $data['login']) ? 'Email or login already exists' : 'Company already exists';
         return response()->json(['error' => $message], 400);
     }
+    
     if ( User::where('email', $data['email'])->orWhere('login', $data['login'])->exists() ||
        Sadmin::where('email', $data['email'])->orWhere('login', $data['login'])->exists()) {
     return response()->json(['message' => 'Email or login already exists in other roles'], 422);
 }
 
-    // Gestion du logo de l'entreprise
     if ($request->hasFile('company.logo')) {
         $logo = $request->file('company.logo');
         $logoPath = $logo->store('public'); // Stocke le fichier dans le dossier storage/app/public avec le nom de fichier original

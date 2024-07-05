@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/chat/send', [ChatController::class, 'sendMessage']);
 Route::get('/chat/group', [ChatController::class, 'getMessages']);
-Route::post('/sadmin/signup', [SadminController::class, 'signup']);
+Route::post('/signup', [SadminController::class, 'signup']);
 Route::post('/admin/signup', [AdminController::class, 'ajoutadmin']);
 Route::post('/admin/login', [LoginController::class, 'authenticate']);
 Route::post('/forget', [Controller::class, 'forgetpassword']);
@@ -86,6 +86,9 @@ Route::get('/tasks/{id}', [TaskController::class, 'show']);
 Route::put('/tasks/{id}', [TaskController::class, 'update']);
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy']);
 Route::patch('/tasks/{id}/status', [TaskController::class, 'updateStatus']);
+Route::get('/tasks', [TaskController::class, 'index']);
+Route::get('/user/task/{userId}', [TaskController::class,'findTasksByUser']);
+
 
 Route::get('/statistics/totals', [StatisticController::class, 'getTotals']);
 Route::get('/statistics/average-reunions-per-user', [StatisticController::class, 'getAverageReunionsPerUser']);
@@ -110,7 +113,6 @@ Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
 Route::post('user/logout', [Controller::class, 'userLogout']);
 Route::post('admin/logout', [AdminController::class, 'adminLogout']);
 Route::put('/tasks/{id}/calculate-time-spent', [TaskController::class, 'calculateTimeSpent']);
-Route::middleware('auth:api')->match(['get'], '/findtasks', [TaskController::class, 'findTasksByUser']);
 
 
 Route::middleware('auth:api')->get('/user/tasks', 'TaskController@getUserTasks');

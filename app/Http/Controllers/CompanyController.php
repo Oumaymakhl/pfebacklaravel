@@ -39,6 +39,12 @@ class CompanyController extends Controller
         'subdomaine' => 'required',
         'adresse' => 'required'
     ]);
+    if ($request->has('nom') && $request->input('nom') !== $company->nom) {
+        $existingCompany = Company::where('nom', $request->input('nom'))->where('id', '!=', $id)->first();
+        if ($existingCompany) {
+            return response()->json(['message' => 'Company name already exists. Please choose a different name.'], 422);
+        }
+    }
 
     if ($request->hasFile('logo')) {
         $logo = $request->file('logo');

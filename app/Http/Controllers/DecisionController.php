@@ -11,13 +11,18 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
 class DecisionController extends Controller
 {
-    public function index()
+   public function index()
 {
     $decisions = Decision::all();
-
     
+    foreach ($decisions as $decision) {
+        $decision->likes_count = $decision->likes()->where('like', true)->count();
+        $decision->dislikes_count = $decision->likes()->where('dislike', true)->count();
+    }
+
     return response()->json(['decisions' => $decisions], 200);
 }
+
 
     
 public function store(Request $request)

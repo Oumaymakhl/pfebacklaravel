@@ -99,7 +99,6 @@ class LoginController extends Controller
                 return response()->json(['message' => 'User not found'], 404);
             }
         
-            // Mise à jour de la photo de profil si une nouvelle photo est téléversée
             if ($request->hasFile('profile_photo')) {
                 $photo = $request->file('profile_photo');
                 $photoPath = $photo->store('public/profile_photos'); // Stocke le fichier dans le dossier storage/app/public/profile_photos avec le nom de fichier original
@@ -137,8 +136,7 @@ class LoginController extends Controller
             }
         
             return response()->json(['profile' => $profile], 200);
-        }
-        public function updateprofile(Request $request)
+        }public function updateprofile(Request $request)
         {
             $token = JWTAuth::getToken();
             $payload = JWTAuth::getPayload($token)->toArray();
@@ -162,10 +160,41 @@ class LoginController extends Controller
                 return response()->json(['message' => 'User not found'], 404);
             }
         
+            $request->validate([
+                'nom' => 'required',
+                'login' => 'required',
+                'email' => 'required|email',
+            ]);
+        
+            // Check if email or login already exists in other roles
+            $email = $request->input('email');
+            $login = $request->input('login');
+        
+            $userExists = false;
+        
+            switch ($type) {
+                case 'admin':
+                    $userExists = User::where('email', $email)->orWhere('login', $login)->exists();
+                    break;
+                case 'superadmin':
+                    $userExists = User::where('email', $email)->orWhere('login', $login)->exists() ||
+                                  Sadmin::where('email', $email)->orWhere('login', $login)->exists();
+                    break;
+                case 'user':
+                default:
+                    $userExists = Admin::where('email', $email)->orWhere('login', $login)->exists() ||
+                                  Sadmin::where('email', $email)->orWhere('login', $login)->exists();
+                    break;
+            }
+        
+            if ($userExists) {
+                return response()->json(['message' => 'Email or login already exists in other roles'], 422);
+            }
+        
             $user->nom = $request->input('nom', $user->nom);
             $user->prenom = $request->input('prenom', $user->prenom);
-            $user->login = $request->input('login', $user->login);
-            $user->email = $request->input('email', $user->email);
+            $user->login = $login;
+            $user->email = $email;
         
             if ($request->hasFile('profile_photo')) {
                 $photo = $request->file('profile_photo');
@@ -178,4 +207,5 @@ class LoginController extends Controller
             $user->save();
         
             return response()->json(['message' => 'Profile updated successfully', 'profile' => $user], 200);
-        }}
+        }
+    }        
